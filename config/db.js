@@ -3,9 +3,9 @@ const oracledb = require('oracledb');
 async function initialize() {
     try {
         await oracledb.createPool({
-            user: 'your_username',
-            password: 'your_password',
-            connectString: 'your_connect_string'
+            user: 'sys',
+            password: 'Aryan2023030#',
+            connectString: 'localhost/orcl'
         });
         console.log('Oracle Database connection pool started');
     } catch (err) {

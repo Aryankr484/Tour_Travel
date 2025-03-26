@@ -6,8 +6,10 @@ const cookieParser = require('cookie-parser');
 const path = require('path');
 const oracledb = require('oracledb');
 const db = require('./config/db'); // Require the db.js file
-app.set('view engine', 'ejs');
+require('dotenv').config();
 const upload = require('./config/multerconfig');
+
+app.set('view engine', 'ejs');
 
 app.use(express.static(path.join(__dirname, "public")));
 app.use(express.json());
@@ -40,24 +42,28 @@ app.post('/register', async (req, res) => {
     let { email, password, username, name, age, gender, phone } = req.body;
     let connection;
     try {
-        connection = await oracledb.getConnection();
+        connection = await oracledb.getConnection({
+            user: 'sys',
+            password: 'Aryan2023030#',
+            connectString: 'localhost/orcl'
+        });
         const result = await connection.execute(
             `SELECT * FROM users WHERE email = :email`,
-            [email]
+            { email }
         );
         if (result.rows.length > 0) {
-            return res.status(500).send("user already registered");
+            return res.status(500).send("User already registered");
         }
         const salt = await bcrypt.genSalt(10);
         const hash = await bcrypt.hash(password, salt);
         await connection.execute(
             `INSERT INTO users (username, name, age, email, gender, phone, password) VALUES (:username, :name, :age, :email, :gender, :phone, :password)`,
-            [username, name, age, email, gender, phone, hash],
+            { username, name, age, email, gender, phone, password: hash },
             { autoCommit: true }
         );
         const token = jwt.sign({ email: email, userid: result.insertId }, "shhh");
         res.cookie('token', token);
-        res.send("registered");
+        res.send("Registered");
     } catch (err) {
         console.error(err);
         res.status(500).send("Error registering user");
@@ -75,10 +81,14 @@ app.post('/register', async (req, res) => {
 app.post('/upload', isLoggedIn, upload.single("image"), async (req, res) => {
     let connection;
     try {
-        connection = await oracledb.getConnection();
+        connection = await oracledb.getConnection({
+            user: 'sys',
+            password: 'Aryan2023030#',
+            connectString: 'localhost/orcl'
+        });
         await connection.execute(
             `UPDATE users SET profilepic = :profilepic WHERE email = :email`,
-            [req.file.filename, req.user.email],
+            { profilepic: req.file.filename, email: req.user.email },
             { autoCommit: true }
         );
         res.redirect("/profile");
@@ -99,10 +109,14 @@ app.post('/upload', isLoggedIn, upload.single("image"), async (req, res) => {
 app.post('/delete', isLoggedIn, async (req, res) => {
     let connection;
     try {
-        connection = await oracledb.getConnection();
+        connection = await oracledb.getConnection({
+            user: 'sys',
+            password: 'Aryan2023030#',
+            connectString: 'localhost/orcl'
+        });
         await connection.execute(
             `UPDATE users SET profilepic = 'default.png' WHERE email = :email`,
-            [req.user.email],
+            { email: req.user.email },
             { autoCommit: true }
         );
         res.redirect("/profile");
@@ -128,10 +142,14 @@ app.post('/login', async (req, res) => {
     let { email, password } = req.body;
     let connection;
     try {
-        connection = await oracledb.getConnection();
+        connection = await oracledb.getConnection({
+            user: 'sys',
+            password: 'Aryan2023030#',
+            connectString: 'localhost/orcl'
+        });
         const result = await connection.execute(
             `SELECT * FROM users WHERE email = :email`,
-            [email]
+            { email }
         );
         if (result.rows.length === 0) {
             return res.status(500).send("User not found");
@@ -162,15 +180,19 @@ app.post('/login', async (req, res) => {
 app.get('/profile', isLoggedIn, async (req, res) => {
     let connection;
     try {
-        connection = await oracledb.getConnection();
+        connection = await oracledb.getConnection({
+            user: 'sys',
+            password: 'Aryan2023030#',
+            connectString: 'localhost/orcl'
+        });
         const result = await connection.execute(
             `SELECT * FROM users WHERE email = :email`,
-            [req.user.email]
+            { email: req.user.email }
         );
         const user = result.rows[0];
         const postsResult = await connection.execute(
             `SELECT * FROM posts WHERE user_id = :user_id`,
-            [user.ID]
+            { user_id: user.ID }
         );
         user.posts = postsResult.rows;
         res.render("profile", { user });
@@ -191,10 +213,14 @@ app.get('/profile', isLoggedIn, async (req, res) => {
 app.get('/edit/:id', isLoggedIn, async (req, res) => {
     let connection;
     try {
-        connection = await oracledb.getConnection();
+        connection = await oracledb.getConnection({
+            user: 'sys',
+            password: 'Aryan2023030#',
+            connectString: 'localhost/orcl'
+        });
         const result = await connection.execute(
             `SELECT * FROM posts WHERE id = :id`,
-            [req.params.id]
+            { id: req.params.id }
         );
         const post = result.rows[0];
         res.render("edit", { post });
@@ -215,10 +241,14 @@ app.get('/edit/:id', isLoggedIn, async (req, res) => {
 app.get('/delete/:id', isLoggedIn, async (req, res) => {
     let connection;
     try {
-        connection = await oracledb.getConnection();
+        connection = await oracledb.getConnection({
+            user: 'sys',
+            password: 'Aryan2023030#',
+            connectString: 'localhost/orcl'
+        });
         await connection.execute(
             `DELETE FROM posts WHERE id = :id`,
-            [req.params.id],
+            { id: req.params.id },
             { autoCommit: true }
         );
         res.redirect("/profile");
@@ -240,10 +270,14 @@ app.post('/update/:id', isLoggedIn, async (req, res) => {
     let { name, age, gender, phone } = req.body;
     let connection;
     try {
-        connection = await oracledb.getConnection();
+        connection = await oracledb.getConnection({
+            user: 'sys',
+            password: 'Aryan2023030#',
+            connectString: 'localhost/orcl'
+        });
         await connection.execute(
             `UPDATE posts SET name = :name, age = :age, gender = :gender, phone = :phone WHERE id = :id`,
-            [name, age, gender, phone, req.params.id],
+            { name, age, gender, phone, id: req.params.id },
             { autoCommit: true }
         );
         res.redirect("/profile");
@@ -265,10 +299,14 @@ app.post('/post', isLoggedIn, async (req, res) => {
     let { name, age, gender, phone } = req.body;
     let connection;
     try {
-        connection = await oracledb.getConnection();
+        connection = await oracledb.getConnection({
+            user: 'sys',
+            password: 'Aryan2023030#',
+            connectString: 'localhost/orcl'
+        });
         const result = await connection.execute(
             `INSERT INTO posts (user_id, name, age, gender, phone) VALUES (:user_id, :name, :age, :gender, :phone)`,
-            [req.user.userid, name, age, gender, phone],
+            { user_id: req.user.userid, name, age, gender, phone },
             { autoCommit: true }
         );
         res.redirect("/profile");
