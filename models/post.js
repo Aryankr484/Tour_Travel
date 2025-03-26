@@ -1,6 +1,5 @@
 const oracledb = require('oracledb');
 
-
 async function createPost(postData) {
     let connection;
     try {

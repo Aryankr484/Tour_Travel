@@ -2,7 +2,6 @@ const multer = require('multer');
 const crypto = require('crypto');
 const path = require('path');
 const oracledb = require('oracledb');
-require('dotenv').config();
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {

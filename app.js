@@ -6,7 +6,6 @@ const cookieParser = require('cookie-parser');
 const path = require('path');
 const oracledb = require('oracledb');
 const db = require('./config/db'); // Require the db.js file
-require('dotenv').config();
 const upload = require('./config/multerconfig');
 
 app.set('view engine', 'ejs');

@@ -5,9 +5,9 @@ async function createUser(userData) {
     let connection;
     try {
         connection = await oracledb.getConnection({
-            user: process.env.DB_USER,
-            password: process.env.DB_PASSWORD,
-            connectString: process.env.DB_CONNECT_STRING
+            user: 'sys',
+            password: 'Aryan2023030#',
+            connectString: 'localhost/orcl'
         });
 
         const result = await connection.execute(
