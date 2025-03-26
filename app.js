@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
 const path = require('path');
 const oracledb = require('oracledb');
-const db = require('./db');
+const db = require('./config/db'); // Require the db.js file
 app.set('view engine', 'ejs');
 const upload = require('./config/multerconfig');
 
