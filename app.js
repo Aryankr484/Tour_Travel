@@ -4,18 +4,17 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
 const path = require('path');
-const postModel = require('./models/post');
-const userModel = require('./models/user');
+const oracledb = require('oracledb');
+const db = require('./db');
 app.set('view engine', 'ejs');
 const upload = require('./config/multerconfig');
-const { name } = require('ejs');
 
 app.use(express.static(path.join(__dirname, "public")));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-function isLoggedIn(req, res, next) {
+async function isLoggedIn(req, res, next) {
     const token = req.cookies.token;
     if (!token) {
         return res.redirect('/login');
@@ -39,40 +38,86 @@ app.get('/profile/upload', isLoggedIn, (req, res) => {
 
 app.post('/register', async (req, res) => {
     let { email, password, username, name, age, gender, phone } = req.body;
-    let user = await userModel.findOne({ email });
-    if (user) {
-        return res.status(500).send("user already registered");
+    let connection;
+    try {
+        connection = await oracledb.getConnection();
+        const result = await connection.execute(
+            `SELECT * FROM users WHERE email = :email`,
+            [email]
+        );
+        if (result.rows.length > 0) {
+            return res.status(500).send("user already registered");
+        }
+        const salt = await bcrypt.genSalt(10);
+        const hash = await bcrypt.hash(password, salt);
+        await connection.execute(
+            `INSERT INTO users (username, name, age, email, gender, phone, password) VALUES (:username, :name, :age, :email, :gender, :phone, :password)`,
+            [username, name, age, email, gender, phone, hash],
+            { autoCommit: true }
+        );
+        const token = jwt.sign({ email: email, userid: result.insertId }, "shhh");
+        res.cookie('token', token);
+        res.send("registered");
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Error registering user");
+    } finally {
+        if (connection) {
+            try {
+                await connection.close();
+            } catch (err) {
+                console.error(err);
+            }
+        }
     }
-    bcrypt.genSalt(10, (err, salt) => {
-        bcrypt.hash(password, salt, async (err, hash) => {
-            let user = await userModel.create({
-                username,
-                name,
-                age,
-                email,
-                gender,
-                phone,
-                password: hash
-            });
-            let token = jwt.sign({ email: email, userid: user._id }, "shhh");
-            res.cookie('token', token);
-            res.send("registered");
-        });
-    });
 });
 
 app.post('/upload', isLoggedIn, upload.single("image"), async (req, res) => {
-    let user = await userModel.findOne({ email: req.user.email });
-    user.profilepic = req.file.filename;
-    await user.save();
-    res.redirect("/profile");
+    let connection;
+    try {
+        connection = await oracledb.getConnection();
+        await connection.execute(
+            `UPDATE users SET profilepic = :profilepic WHERE email = :email`,
+            [req.file.filename, req.user.email],
+            { autoCommit: true }
+        );
+        res.redirect("/profile");
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Error uploading profile picture");
+    } finally {
+        if (connection) {
+            try {
+                await connection.close();
+            } catch (err) {
+                console.error(err);
+            }
+        }
+    }
 });
 
 app.post('/delete', isLoggedIn, async (req, res) => {
-    let user = await userModel.findOne({ email: req.user.email });
-    user.profilepic = "default.png";
-    await user.save();
-    res.redirect("/profile");
+    let connection;
+    try {
+        connection = await oracledb.getConnection();
+        await connection.execute(
+            `UPDATE users SET profilepic = 'default.png' WHERE email = :email`,
+            [req.user.email],
+            { autoCommit: true }
+        );
+        res.redirect("/profile");
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Error deleting profile picture");
+    } finally {
+        if (connection) {
+            try {
+                await connection.close();
+            } catch (err) {
+                console.error(err);
+            }
+        }
+    }
 });
 
 app.get('/login', (req, res) => {
@@ -81,84 +126,177 @@ app.get('/login', (req, res) => {
 
 app.post('/login', async (req, res) => {
     let { email, password } = req.body;
-    let user = await userModel.findOne({ email });
-    if (!user) {
-        return res.status(500).send("User not found");
-    }
-    bcrypt.compare(password, user.password, function (err, result) {
-        if (result) {
-            let token = jwt.sign({ email: email, userid: user._id }, "shhh");
+    let connection;
+    try {
+        connection = await oracledb.getConnection();
+        const result = await connection.execute(
+            `SELECT * FROM users WHERE email = :email`,
+            [email]
+        );
+        if (result.rows.length === 0) {
+            return res.status(500).send("User not found");
+        }
+        const user = result.rows[0];
+        const match = await bcrypt.compare(password, user.PASSWORD);
+        if (match) {
+            const token = jwt.sign({ email: email, userid: user.ID }, "shhh");
             res.cookie('token', token);
             res.status(200).redirect("/profile");
         } else {
             res.status(401).send("Invalid credentials");
         }
-    });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Error logging in");
+    } finally {
+        if (connection) {
+            try {
+                await connection.close();
+            } catch (err) {
+                console.error(err);
+            }
+        }
+    }
 });
 
 app.get('/profile', isLoggedIn, async (req, res) => {
-    let user = await userModel.findOne({ email: req.user.email }).populate("posts");
-    res.render("profile", { user });
+    let connection;
+    try {
+        connection = await oracledb.getConnection();
+        const result = await connection.execute(
+            `SELECT * FROM users WHERE email = :email`,
+            [req.user.email]
+        );
+        const user = result.rows[0];
+        const postsResult = await connection.execute(
+            `SELECT * FROM posts WHERE user_id = :user_id`,
+            [user.ID]
+        );
+        user.posts = postsResult.rows;
+        res.render("profile", { user });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Error fetching profile");
+    } finally {
+        if (connection) {
+            try {
+                await connection.close();
+            } catch (err) {
+                console.error(err);
+            }
+        }
+    }
 });
 
-// app.get('/like/:id', isLoggedIn, async (req, res) => {
-//     let post = await postModel.findOne({ _id: req.params.id }).populate("user");
-//     if (post.likes.indexOf(req.user.userid) == -1) {
-//         post.likes.push(req.user.userid);
-//     } else {
-//         post.likes.splice(post.likes.indexOf(req.user.userid), 1);
-//     }
-//     await post.save();
-//     res.redirect("/profile");
-// });
-
 app.get('/edit/:id', isLoggedIn, async (req, res) => {
-    let post = await postModel.findOne({ _id: req.params.id }).populate("user");
-    res.render("edit", { post });
+    let connection;
+    try {
+        connection = await oracledb.getConnection();
+        const result = await connection.execute(
+            `SELECT * FROM posts WHERE id = :id`,
+            [req.params.id]
+        );
+        const post = result.rows[0];
+        res.render("edit", { post });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Error fetching post");
+    } finally {
+        if (connection) {
+            try {
+                await connection.close();
+            } catch (err) {
+                console.error(err);
+            }
+        }
+    }
 });
 
 app.get('/delete/:id', isLoggedIn, async (req, res) => {
-    let post = await postModel.findOneAndDelete({ _id: req.params.id });
-    res.redirect("/profile");
-});
-// { content: req.body.content }
-app.post('/update/:id', isLoggedIn, async (req, res) => {
-    let { name, age, gender, phone }=req.body;
-    let post = await postModel.findOneAndUpdate({ _id: req.params.id },{ name, age,gender, phone },
-        { new: true });
-    res.redirect("/profile");
+    let connection;
+    try {
+        connection = await oracledb.getConnection();
+        await connection.execute(
+            `DELETE FROM posts WHERE id = :id`,
+            [req.params.id],
+            { autoCommit: true }
+        );
+        res.redirect("/profile");
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Error deleting post");
+    } finally {
+        if (connection) {
+            try {
+                await connection.close();
+            } catch (err) {
+                console.error(err);
+            }
+        }
+    }
 });
 
-// app.post('/post', isLoggedIn, async (req, res) => {
-//     let user = await userModel.findOne({ email: req.user.email });
-//     let { content } = req.body;
-//     let post = await postModel.create({
-//         user: user._id,
-//         content
-//     });
-//     user.posts.push(post._id);
-//     await user.save();
-//     res.redirect("/profile");
-// });
-app.post('/post', isLoggedIn, async (req, res) => {
-    let user = await userModel.findOne({ email: req.user.email });
+app.post('/update/:id', isLoggedIn, async (req, res) => {
     let { name, age, gender, phone } = req.body;
-    let post = await postModel.create({
-        user: user._id,
-        name,
-        age,
-        gender,
-        phone
-    });
-    user.posts.push(post._id);
-    await user.save();
-    res.redirect("/profile");
+    let connection;
+    try {
+        connection = await oracledb.getConnection();
+        await connection.execute(
+            `UPDATE posts SET name = :name, age = :age, gender = :gender, phone = :phone WHERE id = :id`,
+            [name, age, gender, phone, req.params.id],
+            { autoCommit: true }
+        );
+        res.redirect("/profile");
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Error updating post");
+    } finally {
+        if (connection) {
+            try {
+                await connection.close();
+            } catch (err) {
+                console.error(err);
+            }
+        }
+    }
 });
+
+app.post('/post', isLoggedIn, async (req, res) => {
+    let { name, age, gender, phone } = req.body;
+    let connection;
+    try {
+        connection = await oracledb.getConnection();
+        const result = await connection.execute(
+            `INSERT INTO posts (user_id, name, age, gender, phone) VALUES (:user_id, :name, :age, :gender, :phone)`,
+            [req.user.userid, name, age, gender, phone],
+            { autoCommit: true }
+        );
+        res.redirect("/profile");
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Error creating post");
+    } finally {
+        if (connection) {
+            try {
+                await connection.close();
+            } catch (err) {
+                console.error(err);
+            }
+        }
+    }
+});
+
 app.get('/logout', (req, res) => {
     res.cookie("token", "");
     res.redirect("/");
 });
 
-app.listen(3000, () => {
+app.listen(3000, async () => {
+    await db.initialize();
     console.log("Server is running on port 3000");
+});
+
+process.on('SIGINT', async () => {
+    await db.close();
+    process.exit(0);
 });
