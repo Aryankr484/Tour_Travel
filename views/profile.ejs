@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+    <div class="w-full min-h-screen bg-zinc-900 text-white text-white p-10">
+        <div class="w-full flex justify-end">
+            <a class="bg-red-500 rounded-md px-3 py-1 mb-5 inline-block" href="/logout">Logout</a>
+        </div>
+        <div class="flex gap-4 mb-3">
+            <div class="h-10 w-10 rounded-md overflow-hidden">
+                <a href="profile/upload"><img class="w-full h-full object-cover" src="/images/uploads/<%= user.profilepic %>" alt=""></a>
+            </div>
+            <h3 class="text-3xl"><span class="font-light">Hello</span>, <%= user.name %>👋</h3>
+        </div>
+        <h5>Enter the Details of the passengers</h5>
+        <form method="post" action="/post">
+            <input placeholder="name" type="text" class="bg-transparent w-40 px-2 mb-2 py-2 border-2 rounded-lg border-zinc-700 outline-none" name="name" id="name">
+            <input placeholder="age" type="number" class="bg-transparent w-40 px-2 mb-2 py-2 border-2 rounded-lg border-zinc-700 outline-none" name="age" id="age">
+            <input placeholder="gender" type="text" class="bg-transparent w-40 px-2 mb-2 py-2 border-2 rounded-lg border-zinc-700 outline-none" name="gender" id="gender">
+            <input placeholder="phone" type="number" class="bg-transparent w-40 px-2 mb-2 py-2 border-2 rounded-lg border-zinc-700 outline-none" name="phone" id="phone">
+            <input class='px-3 w-40 text-sm py-2 bg-blue-500 block rounded-md mt-2' type="submit" value="Create New Post">
+        </form>
+        <table class="table-auto border-collapse w-full border border-gray-300 mt-5">
+            <thead>
+              <tr class="bg-gray-200">
+                <th class="border border-gray-300 px-4 py-2">Name</th>
+                <th class="border border-gray-300 px-4 py-2">Age</th>
+                <th class="border border-gray-300 px-4 py-2">Gender</th>
+                <th class="border border-gray-300 px-4 py-2">Phone Number</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% user.posts.forEach(function(post) { %>
+                <tr class="hover:bg-gray-100">
+                  <td class="border border-gray-300 px-4 py-2"><%=post.name %></td>
+                  <td class="border border-gray-300 px-4 py-2"><%=post.age %></td>
+                  <td class="border border-gray-300 px-4 py-2"><%=post.gender %></td>
+                  <td class="border border-gray-300 px-4 py-2"><%=post.phone %></td>
+                  <td class="border border-gray-300 px-4 py-2"><a class="text-zinc-600" href="/edit/<%=post._id%>">edit</a></td>
+                  <td class="border border-gray-300 px-4 py-2"><a class="text-red-500" href="/delete/<%=post._id%>">delete</a></td>
+                </tr>
+              <% }); %>
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

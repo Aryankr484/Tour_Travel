@@ -1,0 +1,33 @@
+const mongoose=require('mongoose');
+
+
+const postSchema=mongoose.Schema({
+    user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "user"
+    },
+    date: {
+        type: Date,
+        default: Date.now
+    },
+    name: {
+        type: String,
+        required: true
+    },
+    age: {
+        type: Number,
+        required: true
+    },
+    gender: {
+        type: String,
+        required: true
+    },
+    phone: {
+        type: String,
+        required: true
+    },
+    likes: [
+        { type: mongoose.Schema.Types.ObjectId, ref: "user" }
+    ]
+});
+module.exports=mongoose.model('post',postSchema);
