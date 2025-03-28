@@ -10,13 +10,14 @@ async function createPost(postData) {
         });
 
         const result = await connection.execute(
+            
             `INSERT INTO posts (user_id, name, age, gender, phone) VALUES (:user_id, :name, :age, :gender, :phone)`,
             {
                 user_id: postData.user_id,
                 name: postData.name,
                 age: postData.age,
                 gender: postData.gender,
-                phone: postData.phone
+                phone: postData.phone,
             },
             { autoCommit: true }
         );
@@ -39,7 +40,7 @@ async function getPostById(postId) {
     let connection;
     try {
         connection = await oracledb.getConnection({
-            user: 'sys',
+            user: 'SYSDBA',
             password: 'Aryan2023030#',
             connectString: 'localhost/orcl'
         });

@@ -18,11 +18,11 @@
             <textarea placeholder="what's on your mind" class="p-3 w-1/3 bg-transparent border-2 border-zinc-800 rounded-md resize-none" name="content" id=""><%=post.content%></textarea>
             <input class='px-3 w-40 text-sm py-2 bg-yellow-500 text-black block rounded-md mt-2' type="submit" value="Update Post">
         </form>  -->
-        <form method="post" action="/update/<%=post._id%>">
-            <input placeholder="name" type="text" class="bg-transparent w-40 px-2 mb-2 py-2 border-2 rounded-lg border-zinc-700 outline-none" name="name" id="name" value="<%= post.name %>">
-            <input placeholder="age" type="number" class="bg-transparent w-40 px-2 mb-2 py-2 border-2 rounded-lg border-zinc-700 outline-none" name="age" id="age" value="<%= post.age%>">
-            <input placeholder="gender" type="text" class="bg-transparent w-40 px-2 mb-2 py-2 border-2 rounded-lg border-zinc-700 outline-none" name="gender" id="gender" value="<%=post.gender%>">
-            <input placeholder="phone" type="number" class="bg-transparent w-40 px-2 mb-2 py-2 border-2 rounded-lg border-zinc-700 outline-none" name="phone" id="phone" value="<%=post.phone%>">
+        <form method="post" action="/update/<%=post.ID%>">
+            <input placeholder="name" type="text" class="bg-transparent w-40 px-2 mb-2 py-2 border-2 rounded-lg border-zinc-700 outline-none" name="name" id="name" value="<%= post.NAME %>">
+            <input placeholder="age" type="number" class="bg-transparent w-40 px-2 mb-2 py-2 border-2 rounded-lg border-zinc-700 outline-none" name="age" id="age" value="<%= post.AGE%>">
+            <input placeholder="gender" type="text" class="bg-transparent w-40 px-2 mb-2 py-2 border-2 rounded-lg border-zinc-700 outline-none" name="gender" id="gender" value="<%=post.GENDER%>">
+            <input placeholder="phone" type="number" class="bg-transparent w-40 px-2 mb-2 py-2 border-2 rounded-lg border-zinc-700 outline-none" name="phone" id="phone" value="<%=post.PHONE%>">
             <input class='px-3 w-40 text-sm py-2 bg-yellow-500 text-black block rounded-md mt-2' type="submit" value="Update Post">
 
         </form>

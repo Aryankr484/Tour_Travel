@@ -23,7 +23,7 @@ async function saveFileMetadataToDB(filename, originalname) {
     let connection;
     try {
         connection = await oracledb.getConnection({
-            user: 'sys',
+            user: 'SYSDBA',
             password: 'Aryan2023030#',
             connectString: 'localhost/orcl'
         });

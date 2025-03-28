@@ -3,7 +3,7 @@ const oracledb = require('oracledb');
 async function initialize() {
     try {
         await oracledb.createPool({
-            user: 'sys',
+            user: 'SYSDBA',
             password: 'Aryan2023030#',
             connectString: 'localhost/orcl'
         });

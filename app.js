@@ -5,6 +5,7 @@ const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
 const path = require('path');
 const oracledb = require('oracledb');
+oracledb.outFormat=oracledb.OUT_FORMAT_OBJECT;
 const db = require('./config/db'); // Require the db.js file
 const upload = require('./config/multerconfig');
 
@@ -44,7 +45,8 @@ app.post('/register', async (req, res) => {
         connection = await oracledb.getConnection({
             user: 'sys',
             password: 'Aryan2023030#',
-            connectString: 'localhost/orcl'
+            connectString: 'localhost/orcl',
+            privilege: oracledb.SYSDBA
         });
         const result = await connection.execute(
             `SELECT * FROM users WHERE email = :email`,
@@ -83,7 +85,8 @@ app.post('/upload', isLoggedIn, upload.single("image"), async (req, res) => {
         connection = await oracledb.getConnection({
             user: 'sys',
             password: 'Aryan2023030#',
-            connectString: 'localhost/orcl'
+            connectString: 'localhost/orcl',
+            privilege: oracledb.SYSDBA
         });
         await connection.execute(
             `UPDATE users SET profilepic = :profilepic WHERE email = :email`,
@@ -111,7 +114,8 @@ app.post('/delete', isLoggedIn, async (req, res) => {
         connection = await oracledb.getConnection({
             user: 'sys',
             password: 'Aryan2023030#',
-            connectString: 'localhost/orcl'
+            connectString: 'localhost/orcl',
+            privilege: oracledb.SYSDBA
         });
         await connection.execute(
             `UPDATE users SET profilepic = 'default.png' WHERE email = :email`,
@@ -144,7 +148,8 @@ app.post('/login', async (req, res) => {
         connection = await oracledb.getConnection({
             user: 'sys',
             password: 'Aryan2023030#',
-            connectString: 'localhost/orcl'
+            connectString: 'localhost/orcl',
+            privilege: oracledb.SYSDBA
         });
         const result = await connection.execute(
             `SELECT * FROM users WHERE email = :email`,
@@ -182,7 +187,8 @@ app.get('/profile', isLoggedIn, async (req, res) => {
         connection = await oracledb.getConnection({
             user: 'sys',
             password: 'Aryan2023030#',
-            connectString: 'localhost/orcl'
+            connectString: 'localhost/orcl',
+            privilege: oracledb.SYSDBA
         });
         const result = await connection.execute(
             `SELECT * FROM users WHERE email = :email`,
@@ -215,7 +221,8 @@ app.get('/edit/:id', isLoggedIn, async (req, res) => {
         connection = await oracledb.getConnection({
             user: 'sys',
             password: 'Aryan2023030#',
-            connectString: 'localhost/orcl'
+            connectString: 'localhost/orcl',
+            privilege: oracledb.SYSDBA
         });
         const result = await connection.execute(
             `SELECT * FROM posts WHERE id = :id`,
@@ -243,7 +250,8 @@ app.get('/delete/:id', isLoggedIn, async (req, res) => {
         connection = await oracledb.getConnection({
             user: 'sys',
             password: 'Aryan2023030#',
-            connectString: 'localhost/orcl'
+            connectString: 'localhost/orcl',
+            privilege: oracledb.SYSDBA
         });
         await connection.execute(
             `DELETE FROM posts WHERE id = :id`,
@@ -272,13 +280,19 @@ app.post('/update/:id', isLoggedIn, async (req, res) => {
         connection = await oracledb.getConnection({
             user: 'sys',
             password: 'Aryan2023030#',
-            connectString: 'localhost/orcl'
+            connectString: 'localhost/orcl',
+            privilege: oracledb.SYSDBA
         });
-        await connection.execute(
+        const result = await connection.execute(
             `UPDATE posts SET name = :name, age = :age, gender = :gender, phone = :phone WHERE id = :id`,
             { name, age, gender, phone, id: req.params.id },
             { autoCommit: true }
         );
+
+        // Check if the update was successful
+        if (result.rowsAffected === 0) {
+            return res.status(404).send("Post not found or no changes made");
+        }
         res.redirect("/profile");
     } catch (err) {
         console.error(err);
@@ -301,7 +315,8 @@ app.post('/post', isLoggedIn, async (req, res) => {
         connection = await oracledb.getConnection({
             user: 'sys',
             password: 'Aryan2023030#',
-            connectString: 'localhost/orcl'
+            connectString: 'localhost/orcl',
+            privilege: oracledb.SYSDBA
         });
         const result = await connection.execute(
             `INSERT INTO posts (user_id, name, age, gender, phone) VALUES (:user_id, :name, :age, :gender, :phone)`,

@@ -1,17 +1,18 @@
 const oracledb = require('oracledb');
-require('dotenv').config();
 
 async function createUser(userData) {
     let connection;
     try {
         connection = await oracledb.getConnection({
-            user: 'sys',
+            user: 'SYSDBA',
             password: 'Aryan2023030#',
             connectString: 'localhost/orcl'
         });
 
         const result = await connection.execute(
+           
             `INSERT INTO users (username, name, email, password, age, gender, phone, profilepic) VALUES (:username, :name, :email, :password, :age, :gender, :phone, :profilepic)`,
+            
             {
                 username: userData.username,
                 name: userData.name,
