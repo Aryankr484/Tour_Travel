@@ -278,6 +278,45 @@ app.get('/delete/:id', isLoggedIn, async (req, res) => {
         }
     }
 });
+app.post('/confirm', isLoggedIn, async (req, res) => {
+    let connection;
+    try {
+        connection = await oracledb.getConnection({
+            user: 'sys',
+            password: 'Aryan2023030#',
+            connectString: 'localhost/orcl',
+            privilege: oracledb.SYSDBA
+        });
+
+        // Fetch user details
+        const result = await connection.execute(
+            `SELECT * FROM users WHERE email = :email`,
+            { email: req.user.email }
+        );
+        const user = result.rows[0];
+
+        // Fetch posts associated with the user
+        const postsResult = await connection.execute(
+            `SELECT * FROM posts WHERE user_id = :user_id`,
+            { user_id: user.ID }
+        );
+        user.posts = postsResult.rows;
+
+        // Set ticketBooked to true and re-render the profile page
+        res.render("profile", { user, ticketBooked: true });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Error booking ticket");
+    } finally {
+        if (connection) {
+            try {
+                await connection.close();
+            } catch (err) {
+                console.error(err);
+            }
+        }
+    }
+});
 
 app.post('/update/:id', isLoggedIn, async (req, res) => {
     let { name, age, gender, phone } = req.body;
@@ -326,7 +365,7 @@ app.post('/post', isLoggedIn, async (req, res) => {
         });
         const result = await connection.execute(
             `INSERT INTO posts (user_id, name, age, gender, phone) VALUES (:user_id, :name, :age, :gender, :phone)`,
-            { user_id: req.user.user_id, name, age, gender, phone },
+            { user_id: req.user.userid, name, age, gender, phone },
             { autoCommit: true }
         );
         res.redirect("/profile");
@@ -343,46 +382,6 @@ app.post('/post', isLoggedIn, async (req, res) => {
         }
     }
 });
-app.post('/confirm', isLoggedIn, async (req, res) => {
-    let connection;
-    try {
-        connection = await oracledb.getConnection({
-            user: 'sys',
-            password: 'Aryan2023030#',
-            connectString: 'localhost/orcl',
-            privilege: oracledb.SYSDBA
-        });
-
-        // Fetch user details
-        const result = await connection.execute(
-            `SELECT * FROM users WHERE email = :email`,
-            { email: req.user.email }
-        );
-        const user = result.rows[0];
-
-        // Fetch posts associated with the user
-        const postsResult = await connection.execute(
-            `SELECT * FROM posts WHERE user_id = :user_id`,
-            { user_id: user.ID }
-        );
-        user.posts = postsResult.rows;
-
-        // Set ticketBooked to true and re-render the profile page
-        res.render("profile", { user, ticketBooked: true });
-    } catch (err) {
-        console.error(err);
-        res.status(500).send("Error booking ticket");
-    } finally {
-        if (connection) {
-            try {
-                await connection.close();
-            } catch (err) {
-                console.error(err);
-            }
-        }
-    }
-});
-
 
 app.get('/logout', (req, res) => {
     res.cookie("token", "");
