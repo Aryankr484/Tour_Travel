@@ -11,7 +11,7 @@ async function createUser(userData) {
 
         const result = await connection.execute(
            
-            `INSERT INTO users (username, name, email, password, age, gender, phone, profilepic) VALUES (:username, :name, :email, :password, :age, :gender, :phone, :profilepic)`,
+            `INSERT INTO users (username, name, email, password, age, gender, phone, profilepic,rating, guide) VALUES (:username, :name, :email, :password, :age, :gender, :phone, :profilepic,:rating, :guide)`,
             
             {
                 username: userData.username,
@@ -21,7 +21,11 @@ async function createUser(userData) {
                 age: userData.age,
                 gender: userData.gender,
                 phone: userData.phone,
-                profilepic: userData.profilepic || 'default.png'
+                profilepic: userData.profilepic || 'default.png',
+                rating: userData.rating || 0,
+                guide: userData.guide
+
+
             },
             { autoCommit: true }
         );

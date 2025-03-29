@@ -62,6 +62,58 @@
             <input class='px-3 w-40 invisible text-sm py-2 bg-gray-300 block rounded-md mt-2' type="submit" value="Ticket Booked">
           <%}%>
         </form>
+        <%if(ticketBooked) {%>
+          <div class="mt-10">
+            <h5 class="text-xl mb-3">Rate Your Experience</h5>
+            <div class="flex items-center">
+                <!-- Star Rating -->
+                <div id="star-rating" class="flex gap-1">
+                    <% for (let i = 1; i <= 5; i++) { %>
+                        <span class="star text-gray-400 text-3xl cursor-pointer" data-value="<%= i %>">★</span>
+                    <% } %>
+                </div>
+                <span id="rating-value" class="ml-3 text-lg text-green-500"></span>
+                <%if(!rating) {%>
+                  <form id="rating-form" method="post" action="/rate" class="mt-3">
+                    <input type="hidden" name="rating" id="rating-input">
+                    <button type="submit" class="px-3 ml-3 py-2 bg-blue-500 text-white rounded-md">Submit Rating</button>
+                </form>
+                <%}%>
+            </div>
+            <form class=" flex flex-col  w-[300px] items-center"  action="/review">
+  
+              <textarea class="bg-transparent w-40 px-2 mt-5 py-2 border-2 rounded-lg border-zinc-700 outline-none w-[300px] h-[100px] resize-none" name="feedback" id=""></textarea>
+              <button type="submit" class="px-3 mt-2 py-2 bg-blue-500 text-white rounded-md w-2/3 ml-5">Submit Review</button>
+          </form>
+          </div>
+        <%}%>
     </div>
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+          const stars = document.querySelectorAll("#star-rating .star");
+          const ratingInput = document.getElementById("rating-input");
+          const ratingValue = document.getElementById("rating-value");
+  
+          stars.forEach((star) => {
+              star.addEventListener("click", () => {
+                  const rating = star.getAttribute("data-value");
+                  ratingInput.value = rating; // Set the hidden input value
+                  ratingValue.textContent = `You rated: ${rating} ★`; // Display the rating
+  
+                  // Highlight the selected stars
+                  stars.forEach((s) => {
+                      if (s.getAttribute("data-value") <= rating) {
+                          s.classList.add("text-yellow-500");
+                          s.classList.remove("text-gray-400");
+                      } else {
+                          s.classList.add("text-gray-400");
+                          s.classList.remove("text-yellow-500");
+                      }
+                  });
+              });
+          });
+      });
+  </script>
 </body>
+
 </html>
