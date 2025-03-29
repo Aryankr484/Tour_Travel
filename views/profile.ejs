@@ -17,14 +17,20 @@
             </div>
             <h3 class="text-3xl"><span class="font-light">Hello</span>, <%= user.NAME %>👋</h3>
         </div>
-        <h5>Enter the Details of the passengers</h5>
-        <form method="post" action="/post">
-            <input placeholder="name" type="text" class="bg-transparent w-40 px-2 mb-2 py-2 border-2 rounded-lg border-zinc-700 outline-none" name="name" id="name">
-            <input placeholder="age" type="number" class="bg-transparent w-40 px-2 mb-2 py-2 border-2 rounded-lg border-zinc-700 outline-none" name="age" id="age">
-            <input placeholder="gender" type="text" class="bg-transparent w-40 px-2 mb-2 py-2 border-2 rounded-lg border-zinc-700 outline-none" name="gender" id="gender">
-            <input placeholder="phone" type="number" class="bg-transparent w-40 px-2 mb-2 py-2 border-2 rounded-lg border-zinc-700 outline-none" name="phone" id="phone">
-            <input class='px-3 w-40 text-sm py-2 bg-blue-500 block rounded-md mt-2' type="submit" value="Add passengers">
-        </form>
+
+        <% if (!ticketBooked) { %>
+            <h5>Enter the Details of the passengers</h5>
+            <form method="post" action="/post">
+                <input placeholder="name" type="text" class="bg-transparent w-40 px-2 mb-2 py-2 border-2 rounded-lg border-zinc-700 outline-none" name="name" id="name">
+                <input placeholder="age" type="number" class="bg-transparent w-40 px-2 mb-2 py-2 border-2 rounded-lg border-zinc-700 outline-none" name="age" id="age">
+                <input placeholder="gender" type="text" class="bg-transparent w-40 px-2 mb-2 py-2 border-2 rounded-lg border-zinc-700 outline-none" name="gender" id="gender">
+                <input placeholder="phone" type="number" class="bg-transparent w-40 px-2 mb-2 py-2 border-2 rounded-lg border-zinc-700 outline-none" name="phone" id="phone">
+                <input class='px-3 w-40 text-sm py-2 bg-blue-500 block rounded-md mt-2' type="submit" value="Add passengers">
+            </form>
+        <% } else { %>
+            <h5 class="text-green-500 text-xl">Ticket Booked</h5>
+        <% } %>
+
         <table class="table-auto border-collapse w-full border border-gray-300 mt-5">
             <thead>
               <tr class="bg-gray-400 text-black">
@@ -41,68 +47,21 @@
                   <td class="border border-gray-300 px-4 py-2"><%= post.AGE %></td>
                   <td class="border border-gray-300 px-4 py-2"><%= post.GENDER %></td>
                   <td class="border border-gray-300 px-4 py-2"><%= post.PHONE %></td>
-                  <td class="border border-gray-300 px-4 py-2"><a class="text-zinc-400" href="/edit/<%= post.ID %>">edit</a></td>
-                  <td class="border border-gray-300 px-4 py-2"><a class="text-red-500" href="/delete/<%= post.ID %>">delete</a></td>
+                  <%if(!ticketBooked) {%>
+                    <td class="border border-gray-300 px-4 py-2"><a class="text-zinc-400" href="/edit/<%= post.ID %>">edit</a></td>
+                    <td class="border border-gray-300 px-4 py-2"><a class="text-red-500" href="/delete/<%= post.ID %>">delete</a></td>
+                  <% } %>
                 </tr>
               <% }); %>
             </tbody>
         </table>
-        <% if (!ticketBooked){ %><form method="post" action="/confirm">
-          <input class='px-3 w-40 text-sm py-2 bg-blue-500 block rounded-md mt-2' type="submit" value="Book Ticket">
-          
+        <form method="post" action="/confirm">
+          <%if(!ticketBooked){%>
+            <input class='px-3 w-40 text-sm py-2 bg-blue-500 block rounded-md mt-2' type="submit" value="Book Ticket">
+          <%} else{%>
+            <input class='px-3 w-40 invisible text-sm py-2 bg-gray-300 block rounded-md mt-2' type="submit" value="Ticket Booked">
+          <%}%>
         </form>
-        <% } else{ %>
-          <input class='invisible' type="submit" value="Book Ticket">
-        <%} %>
-        <% if (ticketBooked){ %>
-            <div class="mt-10">
-              <h5 class="text-xl mb-3">Rate Your Experience</h5>
-              <div class="flex items-center">
-                  <!-- Star Rating -->
-                  <div id="star-rating" class="flex gap-1">
-                      <% for (let i = 1; i <= 5; i++) { %>
-                          <span class="star text-gray-400 text-3xl cursor-pointer" data-value="<%= i %>">★</span>
-                      <% } %>
-                  </div>
-                  <span id="rating-value" class="ml-3 text-lg text-green-500"></span>
-              </div>
-              <form id="rating-form" method="post" action="/rate" class="mt-3">
-                  <input type="hidden" name="rating" id="rating-input">
-                  <textarea name="review" id="review" class="resize-none w-3/4 mb-5 bg-transparent border-2 rounded-lg border-zinc-700 outline-none p-3">
-                  </textarea>
-                  <button type="submit" class="px-3 py-2 bg-blue-500 text-white rounded-md">Submit Review</button>
-              </form>
-          </div>
-          
-        <% } %>
-
     </div>
-
-    <script>
-      document.addEventListener("DOMContentLoaded", () => {
-          const stars = document.querySelectorAll("#star-rating .star");
-          const ratingInput = document.getElementById("rating-input");
-          const ratingValue = document.getElementById("rating-value");
-  
-          stars.forEach((star) => {
-              star.addEventListener("click", () => {
-                  const rating = star.getAttribute("data-value");
-                  ratingInput.value = rating; // Set the hidden input value
-                  ratingValue.textContent = `You rated: ${rating} ★`; // Display the rating
-  
-                  // Highlight the selected stars
-                  stars.forEach((s) => {
-                      if (s.getAttribute("data-value") <= rating) {
-                          s.classList.add("text-yellow-500");
-                          s.classList.remove("text-gray-400");
-                      } else {
-                          s.classList.add("text-gray-400");
-                          s.classList.remove("text-yellow-500");
-                      }
-                  });
-              });
-          });
-      });
-  </script>
 </body>
 </html>
