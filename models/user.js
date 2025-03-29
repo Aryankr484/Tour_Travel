@@ -23,7 +23,8 @@ async function createUser(userData) {
                 phone: userData.phone,
                 profilepic: userData.profilepic || 'default.png',
                 rating: userData.rating || 0,
-                guide: userData.guide
+                guide: userData.guide,
+                ticketBooked: userData.ticketBooked
 
 
             },

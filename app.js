@@ -151,6 +151,8 @@ app.post('/login', async (req, res) => {
             connectString: 'localhost/orcl',
             privilege: oracledb.SYSDBA
         });
+
+        // Fetch user details
         const result = await connection.execute(
             `SELECT * FROM users WHERE email = :email`,
             { email }
@@ -159,11 +161,23 @@ app.post('/login', async (req, res) => {
             return res.status(500).send("User not found");
         }
         const user = result.rows[0];
+
+        // Verify password
         const match = await bcrypt.compare(password, user.PASSWORD);
         if (match) {
             const token = jwt.sign({ email: email, userid: user.ID }, "shhh");
             res.cookie('token', token);
-            res.status(200).redirect("/profile");
+
+            // Fetch posts associated with the user
+            const postsResult = await connection.execute(
+                `SELECT * FROM posts WHERE user_id = :user_id`,
+                { user_id: user.ID }
+            );
+            user.posts = postsResult.rows;
+
+            // Pass the ticketBooked status to the profile page
+            const ticketBooked = user.TICKETBOOKED === 1; // Convert to boolean
+            res.render("profile", { user, ticketBooked });
         } else {
             res.status(401).send("Invalid credentials");
         }
@@ -191,7 +205,7 @@ app.get('/profile', isLoggedIn, async (req, res) => {
             privilege: oracledb.SYSDBA
         });
 
-        // Fetch user details
+        // Fetch user details, including ticketBooked status
         const result = await connection.execute(
             `SELECT * FROM users WHERE email = :email`,
             { email: req.user.email }
@@ -205,20 +219,12 @@ app.get('/profile', isLoggedIn, async (req, res) => {
         );
         user.posts = postsResult.rows;
 
-        // Fetch user's rating (latest rating)
-        const ratingResult = await connection.execute(
-            `SELECT rating FROM guidePosts WHERE user_id = :user_id ORDER BY id DESC FETCH FIRST 1 ROWS ONLY`,
-            { user_id: user.ID }
-        );
-
-        // Extract rating (set to null if no rating found)
-        const rating = ratingResult.rows.length > 0 ? ratingResult.rows[0][0] : null;
-
-        // Pass rating and ticketBooked status to the template
-        res.render("profile", { user, ticketBooked: user.ticketBooked});
+        // Pass the ticketBooked status to the profile page
+        const ticketBooked = user.TICKETBOOKED === 1; // Convert to boolean
+        res.render("profile", { user, ticketBooked });
     } catch (err) {
         console.error(err);
-        res.status(500).send("Error loading profile");
+        res.status(500).send("Error fetching profile");
     } finally {
         if (connection) {
             try {
@@ -345,6 +351,13 @@ app.post('/confirm', isLoggedIn, async (req, res) => {
             privilege: oracledb.SYSDBA
         });
 
+        // Update the ticketBooked status in the database
+        await connection.execute(
+            `UPDATE users SET ticketBooked = 1 WHERE email = :email`,
+            { email: req.user.email },
+            { autoCommit: true }
+        );
+
         // Fetch user details
         const result = await connection.execute(
             `SELECT * FROM users WHERE email = :email`,
@@ -359,11 +372,11 @@ app.post('/confirm', isLoggedIn, async (req, res) => {
         );
         user.posts = postsResult.rows;
 
-        // Set ticketBooked to true and re-render the profile page
-        res.render("rate",{user, ticketBooked: 1, rating:0});
+        // Render the profile page with ticketBooked set to true
+        res.render("rate", { user, ticketBooked: true,  rating:req.body.rating});
     } catch (err) {
         console.error(err);
-        res.status(500).send("Error booking ticket");
+        res.status(500).send("Error Booking Ticket");
     } finally {
         if (connection) {
             try {
