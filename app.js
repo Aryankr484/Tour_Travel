@@ -157,9 +157,11 @@ app.post('/login', async (req, res) => {
             `SELECT * FROM users WHERE email = :email`,
             { email }
         );
+
         if (result.rows.length === 0) {
             return res.status(500).send("User not found");
         }
+
         const user = result.rows[0];
 
         // Verify password
@@ -175,9 +177,10 @@ app.post('/login', async (req, res) => {
             );
             user.posts = postsResult.rows;
 
-            // Pass the ticketBooked status to the profile page
-            const ticketBooked = user.TICKETBOOKED === 1; // Convert to boolean
-            res.render("profile", { user, ticketBooked });
+            // Pass the ticketBooked status and rating to the profile page
+            const ticketBooked = user.TICKETBOOKED === 1;
+            const rating = user.RATING; // Fetch the rating from the user object
+            res.render("profile", { user, ticketBooked, rating });
         } else {
             res.status(401).send("Invalid credentials");
         }
@@ -194,7 +197,6 @@ app.post('/login', async (req, res) => {
         }
     }
 });
-
 app.get('/profile', isLoggedIn, async (req, res) => {
     let connection;
     try {
@@ -205,11 +207,16 @@ app.get('/profile', isLoggedIn, async (req, res) => {
             privilege: oracledb.SYSDBA
         });
 
-        // Fetch user details, including ticketBooked status
+        // Fetch user details, including ticketBooked status and rating
         const result = await connection.execute(
             `SELECT * FROM users WHERE email = :email`,
             { email: req.user.email }
         );
+
+        if (result.rows.length === 0) {
+            return res.status(404).send("User not found");
+        }
+
         const user = result.rows[0];
 
         // Fetch posts associated with the user
@@ -219,9 +226,10 @@ app.get('/profile', isLoggedIn, async (req, res) => {
         );
         user.posts = postsResult.rows;
 
-        // Pass the ticketBooked status to the profile page
-        const ticketBooked = user.TICKETBOOKED === 1; // Convert to boolean
-        res.render("profile", { user, ticketBooked });
+        // Pass the ticketBooked status and rating to the profile page
+        const ticketBooked = user.TICKETBOOKED === 1;
+        const rating = user.RATING;
+        res.render("profile", { user, ticketBooked, rating });
     } catch (err) {
         console.error(err);
         res.status(500).send("Error fetching profile");
