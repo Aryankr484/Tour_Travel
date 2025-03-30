@@ -179,8 +179,9 @@ app.post('/login', async (req, res) => {
 
             // Pass the ticketBooked status and rating to the profile page
             const ticketBooked = user.TICKETBOOKED === 1;
-            const rating = user.RATING; // Fetch the rating from the user object
-            res.render("profile", { user, ticketBooked, rating });
+            const rating = user.RATING; 
+            const review = user.REVIEW;// Fetch the rating from the user object
+            res.render("profile", { user, ticketBooked, rating, review });
         } else {
             res.status(401).send("Invalid credentials");
         }
@@ -229,7 +230,10 @@ app.get('/profile', isLoggedIn, async (req, res) => {
         // Pass the ticketBooked status and rating to the profile page
         const ticketBooked = user.TICKETBOOKED === 1;
         const rating = user.RATING;
-        res.render("profile", { user, ticketBooked, rating });
+        const review = user.REVIEW;
+
+
+        res.render("profile", { user, ticketBooked, rating,review });
     } catch (err) {
         console.error(err);
         res.status(500).send("Error fetching profile");
@@ -517,61 +521,12 @@ app.post('/rate', isLoggedIn, async (req, res) => {
             { rating: req.body.rating, email: req.user.email },
             { autoCommit: true }
         );
-        // const result3 = await connection.execute(
-        //     `UPDATE users SET review = :review WHERE email = :email`,
-        //     { review: req.body.review, email: req.user.email },
-        //     { autoCommit: true }
-        // );
-        const result = await connection.execute(
-            `SELECT * FROM users WHERE email = :email`,
-            { email: req.user.email }
-        );
-        const user = result.rows[0];
-
-        // Fetch posts associated with the user
-        const postsResult = await connection.execute(
-            `SELECT * FROM posts WHERE user_id = :user_id`,
-            { user_id: user.ID }
-        );
-        user.posts = postsResult.rows;
-
-        // Set ticketBooked to true and re-render the profile page
-        res.render("rate",{user, ticketBooked: 1, rating: req.body.rating, review: req.body.review});
-    } catch (err) {
-        console.error(err);
-        res.status(500).send("Error booking ticket");
-    } finally {
-        if (connection) {
-            try {
-                await connection.close();
-            } catch (err) {
-                console.error(err);
-            }
-        }
-    }
-});
-app.post('/review', isLoggedIn, async (req, res) => {
-    let connection;
-    try {
-        connection = await oracledb.getConnection({
-            user: 'sys',
-            password: 'Aryan2023030#',
-            connectString: 'localhost/orcl',
-            privilege: oracledb.SYSDBA
-        });
-
-        // Fetch user details
-        const result1 = await connection.execute(
+        const result3 = await connection.execute(
             `INSERT INTO guidePosts (user_id, email, rating, review) VALUES (:user_id,:email, :rating, :review)`,
             { user_id: req.user.userid, email:req.user.email, rating: req.body.rating, review: req.body.review},
             { autoCommit: true }
         );
-        // const result2 = await connection.execute(
-        //     `UPDATE users SET rating = :rating WHERE email = :email`,
-        //     { rating: req.body.rating, email: req.user.email },
-        //     { autoCommit: true }
-        // );
-        const result3 = await connection.execute(
+        const result4 = await connection.execute(
             `UPDATE users SET review = :review WHERE email = :email`,
             { review: req.body.review, email: req.user.email },
             { autoCommit: true }
@@ -604,6 +559,60 @@ app.post('/review', isLoggedIn, async (req, res) => {
         }
     }
 });
+// app.post('/review', isLoggedIn, async (req, res) => {
+//     let connection;
+//     try {
+//         connection = await oracledb.getConnection({
+//             user: 'sys',
+//             password: 'Aryan2023030#',
+//             connectString: 'localhost/orcl',
+//             privilege: oracledb.SYSDBA
+//         });
+
+//         // Fetch user details
+//         const result1 = await connection.execute(
+//             `INSERT INTO guidePosts (user_id, email, rating, review) VALUES (:user_id,:email, :rating, :review)`,
+//             { user_id: req.user.userid, email:req.user.email, rating: req.body.rating, review: req.body.review},
+//             { autoCommit: true }
+//         );
+//         // const result2 = await connection.execute(
+//         //     `UPDATE users SET rating = :rating WHERE email = :email`,
+//         //     { rating: req.body.rating, email: req.user.email },
+//         //     { autoCommit: true }
+//         // );
+//         const result3 = await connection.execute(
+//             `UPDATE users SET review = :review WHERE email = :email`,
+//             { review: req.body.review, email: req.user.email },
+//             { autoCommit: true }
+//         );
+//         const result = await connection.execute(
+//             `SELECT * FROM users WHERE email = :email`,
+//             { email: req.user.email }
+//         );
+//         const user = result.rows[0];
+
+//         // Fetch posts associated with the user
+//         const postsResult = await connection.execute(
+//             `SELECT * FROM posts WHERE user_id = :user_id`,
+//             { user_id: user.ID }
+//         );
+//         user.posts = postsResult.rows;
+
+//         // Set ticketBooked to true and re-render the profile page
+//         res.render("rate",{user, ticketBooked: 1, rating: req.body.rating, review: req.body.review});
+//     } catch (err) {
+//         console.error(err);
+//         res.status(500).send("Error booking ticket");
+//     } finally {
+//         if (connection) {
+//             try {
+//                 await connection.close();
+//             } catch (err) {
+//                 console.error(err);
+//             }
+//         }
+//     }
+// });
 // app.post('/profile/rate', isLoggedIn, async (req, res) => {
 //     let { rating } = req.body;  // Extract rating from request body
 //     let connection;

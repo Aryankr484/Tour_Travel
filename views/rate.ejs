@@ -52,8 +52,8 @@
             <div class="mt-10">
                 <h5 class="text-xl mb-3">Rate Your Experience</h5>
             
-                <div class="flex items-center">
-                    <% if (!rating) { %>
+                <div>
+                    <% if (!rating && !review) { %>
                         <!-- Star Rating -->
                         <div id="star-rating" class="flex gap-1">
                             <% for (let i = 1; i <= 5; i++) { %>
@@ -61,19 +61,22 @@
                             <% } %>
                         </div>
                         <span id="rating-value" class="ml-3 text-lg text-green-500"></span>
-                        <form id="rating-form" method="post" action="/rate" class="mt-3">
-                            <input type="hidden" name="rating" id="rating-input">
-                            <button type="submit" class="px-3 ml-3 py-2 bg-blue-500 text-white rounded-md">Submit Rating</button>
+                        <form class="flex flex-col" id="rating-form" method="post" action="/rate" class="mt-3">
+                            <div class="flex flex-row">
+                                <input type="hidden" name="rating" id="rating-input">
+                                <button type="submit" class="px-3 ml-3 py-2 bg-blue-500 text-white rounded-md">Submit Rating</button>
+                            </div>
+
+                            <div class="flex flex-col w-[300px] items-center">
+                                <textarea class="bg-transparent w-40 px-2 mt-5 py-2 border-2 rounded-lg border-zinc-700 outline-none w-[300px] h-[100px] resize-none" name="review" id="review-input"><%= review || '' %></textarea>
+                                <button type="submit" class="px-3 mt-2 py-2 bg-blue-500 text-white rounded-md w-2/3 ml-5">Submit Review</button>
+                            </div>
                         </form>
                     <% } else { %>
                         <h5 class="text-xl mb-3">Your Rating: <%= rating %>★</h5>
+                        <h5 class="text-xl mb-3">Your Review: <%= review %></h5>
                     <% } %>
                 </div>
-            
-                <form class="flex flex-col w-[300px] items-center" method="post" action="/review">
-                    <textarea class="bg-transparent w-40 px-2 mt-5 py-2 border-2 rounded-lg border-zinc-700 outline-none w-[300px] h-[100px] resize-none" name="review" id=""><%= review || '' %></textarea>
-                    <button type="submit" class="px-3 mt-2 py-2 bg-blue-500 text-white rounded-md w-2/3 ml-5">Submit Review</button>
-                </form>
             </div>
           </div>
         <%}%>

@@ -64,6 +64,13 @@
           <% } else{ %>
             <span class="text-gray-700 text-sm">No rating yet</span>
             <%}%>
+
+
+            <% if (review) { %>
+              <span class="text-green-500 text-xl"><%= review %></span>
+            <% } else{ %>
+              <span class="text-gray-700 text-sm">No review yet</span>
+              <%}%>
           <%}%>
           
         </form>
