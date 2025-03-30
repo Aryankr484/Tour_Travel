@@ -47,10 +47,8 @@
                   <td class="border border-gray-300 px-4 py-2"><%= post.AGE %></td>
                   <td class="border border-gray-300 px-4 py-2"><%= post.GENDER %></td>
                   <td class="border border-gray-300 px-4 py-2"><%= post.PHONE %></td>
-                  <%if(!ticketBooked) {%>
                     <td class="border border-gray-300 px-4 py-2"><a class="text-zinc-400" href="/edit/<%= post.ID %>">edit</a></td>
                     <td class="border border-gray-300 px-4 py-2"><a class="text-red-500" href="/delete/<%= post.ID %>">delete</a></td>
-                  <% } %>
                 </tr>
               <% }); %>
             </tbody>
@@ -60,16 +58,24 @@
             <input class='px-3 w-40 text-sm py-2 bg-blue-500 block rounded-md mt-2' type="submit" value="Book Ticket">
           <%} else{%>
             <input class='px-3 w-40 invisible text-sm py-2 bg-gray-300 block rounded-md mt-2' type="submit" value="Ticket Booked">
-          <%}%>
-        </form>
-        <div class="mt-5">
-          <h3 class="text-xl">Your Rating</h3>
+            <h3 class="text-xl">Your rated:-</h3>
           <% if (rating) { %>
-              <p class="text-lg text-green-500"><%= rating %> ★</p>
-          <% } else { %>
-              <p class="text-lg text-gray-500">No rating available</p>
-          <% } %>
-      </div>
+            <span class="text-green-500 text-xl"><%= rating %>★</span>
+          <% } else{ %>
+            <span class="text-gray-700 text-sm">No rating yet</span>
+            <%}%>
+          <%}%>
+          
+        </form>
+        
+        
+        <% if (ticketBooked) { %>
+          <form method="post" action="/delete-ticket">
+              <button class="px-3 w-40 text-sm py-2 bg-red-500 text-white block rounded-md mt-2" type="submit">
+                  Delete Ticket
+              </button>
+          </form>
+      <% } %>
+    </div>
 </body>
-
 </html>

@@ -23,7 +23,7 @@ async function isLoggedIn(req, res, next) {
     }
     try {
         const data = jwt.verify(token, "shhh");
-        req.user = data;
+        req.user = data; // Set req.user.email and req.user.userid
         next();
     } catch {
         return res.redirect('/login');
@@ -346,6 +346,7 @@ app.get('/delete/:id', isLoggedIn, async (req, res) => {
         }
     }
 });
+
 app.post('/confirm', isLoggedIn, async (req, res) => {
     
     let connection;
@@ -428,7 +429,44 @@ app.post('/update/:id', isLoggedIn, async (req, res) => {
         }
     }
 });
+app.post('/delete-ticket', isLoggedIn, async (req, res) => {
+    let connection;
+    try {
+        connection = await oracledb.getConnection({
+            user: 'sys',
+            password: 'Aryan2023030#',
+            connectString: 'localhost/orcl',
+            privilege: oracledb.SYSDBA
+        });
 
+        // Reset ticketBooked status in the users table
+        await connection.execute(
+            `UPDATE users SET ticketBooked = 0 WHERE email = :email`,
+            { email: req.user.email },
+            { autoCommit: true }
+        );
+
+        // Delete all associated passenger details from the posts table
+        await connection.execute(
+            `DELETE FROM posts WHERE user_id = :user_id`,
+            { user_id: req.user.userid },
+            { autoCommit: true }
+        );
+
+        res.redirect('/profile'); // Redirect back to the profile page
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Error deleting ticket");
+    } finally {
+        if (connection) {
+            try {
+                await connection.close();
+            } catch (err) {
+                console.error(err);
+            }
+        }
+    }
+});
 app.post('/post', isLoggedIn, async (req, res) => {
     let { name, age, gender, phone } = req.body;
     let connection;
