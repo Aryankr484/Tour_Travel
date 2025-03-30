@@ -10,9 +10,7 @@ async function createUser(userData) {
         });
 
         const result = await connection.execute(
-           
-            `INSERT INTO users (username, name, email, password, age, gender, phone, profilepic,rating, guide) VALUES (:username, :name, :email, :password, :age, :gender, :phone, :profilepic,:rating, :guide)`,
-            
+            `INSERT INTO users (username, name, email, password, age, gender, phone, profilepic, rating, review, guide, ticketBooked) VALUES (:username, :name, :email, :password, :age, :gender, :phone, :profilepic, :rating, :review,:guide, :ticketBooked)`,
             {
                 username: userData.username,
                 name: userData.name,
@@ -23,10 +21,9 @@ async function createUser(userData) {
                 phone: userData.phone,
                 profilepic: userData.profilepic || 'default.png',
                 rating: userData.rating || 0,
+                review: userData.review || 0,
                 guide: userData.guide,
-                ticketBooked: userData.ticketBooked
-
-
+                ticketBooked: userData.ticketBooked || 0
             },
             { autoCommit: true }
         );

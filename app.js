@@ -245,12 +245,19 @@ app.get('/rate', isLoggedIn, async (req, res) => {
             privilege: oracledb.SYSDBA
         });
 
-        // Fetch user details
+        // Fetch user details, including the review
         const result = await connection.execute(
             `SELECT * FROM users WHERE email = :email`,
             { email: req.user.email }
         );
+
+        if (result.rows.length === 0) {
+            return res.status(404).send("User not found");
+        }
+
         const user = result.rows[0];
+        const rating = user.RATING; // Assuming the column name is RATING
+        const review = user.REVIEW; // Assuming the column name is REVIEW
 
         // Fetch posts associated with the user
         const postsResult = await connection.execute(
@@ -258,21 +265,12 @@ app.get('/rate', isLoggedIn, async (req, res) => {
             { user_id: user.ID }
         );
         user.posts = postsResult.rows;
-        res.render("rate", { user, ticketBooked: true, rating: user.rating });
-        // Fetch user's rating (latest rating)
-        const ratingResult = await connection.execute(
-            `SELECT rating FROM guidePosts WHERE user_id = :user_id ORDER BY id DESC FETCH FIRST 1 ROWS ONLY`,
-            { user_id: user.ID }
-        );
 
-        // Extract rating (set to null if no rating found)
-        const rating = ratingResult.rows.length > 0 ? ratingResult.rows[0][0] : null;
-
-        // Pass rating and ticketBooked status to the template
-        // res.render("rate", { user, ticketBooked: user.ticketBooked});
+        // Render the rate page with the user's rating and review
+        res.render("rate", { user, ticketBooked: user.TICKETBOOKED === 1, rating, review });
     } catch (err) {
         console.error(err);
-        res.status(500).send("Error loading profile");
+        res.status(500).send("Error loading rate page");
     } finally {
         if (connection) {
             try {
@@ -283,7 +281,6 @@ app.get('/rate', isLoggedIn, async (req, res) => {
         }
     }
 });
-
 app.get('/edit/:id', isLoggedIn, async (req, res) => {
     let connection;
     try {
@@ -342,6 +339,7 @@ app.get('/delete/:id', isLoggedIn, async (req, res) => {
     }
 });
 app.post('/confirm', isLoggedIn, async (req, res) => {
+    
     let connection;
     try {
         connection = await oracledb.getConnection({
@@ -373,7 +371,7 @@ app.post('/confirm', isLoggedIn, async (req, res) => {
         user.posts = postsResult.rows;
 
         // Render the profile page with ticketBooked set to true
-        res.render("rate", { user, ticketBooked: true,  rating:req.body.rating});
+        res.render("rate", { user, ticketBooked: true,  rating:req.body.rating, review:req.body.review});
     } catch (err) {
         console.error(err);
         res.status(500).send("Error Booking Ticket");
@@ -464,8 +462,72 @@ app.post('/rate', isLoggedIn, async (req, res) => {
 
         // Fetch user details
         const result1 = await connection.execute(
-            `INSERT INTO guidePosts (user_id, rating) VALUES (:user_id, :rating)`,
-            { user_id: req.user.userid, rating: req.body.rating},
+            `INSERT INTO guidePosts (user_id, email, rating, review) VALUES (:user_id,:email, :rating, :review)`,
+            { user_id: req.user.userid, email:req.user.email, rating: req.body.rating, review: req.body.review},
+            { autoCommit: true }
+        );
+        const result2 = await connection.execute(
+            `UPDATE users SET rating = :rating WHERE email = :email`,
+            { rating: req.body.rating, email: req.user.email },
+            { autoCommit: true }
+        );
+        // const result3 = await connection.execute(
+        //     `UPDATE users SET review = :review WHERE email = :email`,
+        //     { review: req.body.review, email: req.user.email },
+        //     { autoCommit: true }
+        // );
+        const result = await connection.execute(
+            `SELECT * FROM users WHERE email = :email`,
+            { email: req.user.email }
+        );
+        const user = result.rows[0];
+
+        // Fetch posts associated with the user
+        const postsResult = await connection.execute(
+            `SELECT * FROM posts WHERE user_id = :user_id`,
+            { user_id: user.ID }
+        );
+        user.posts = postsResult.rows;
+
+        // Set ticketBooked to true and re-render the profile page
+        res.render("rate",{user, ticketBooked: 1, rating: req.body.rating, review: req.body.review});
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Error booking ticket");
+    } finally {
+        if (connection) {
+            try {
+                await connection.close();
+            } catch (err) {
+                console.error(err);
+            }
+        }
+    }
+});
+app.post('/review', isLoggedIn, async (req, res) => {
+    let connection;
+    try {
+        connection = await oracledb.getConnection({
+            user: 'sys',
+            password: 'Aryan2023030#',
+            connectString: 'localhost/orcl',
+            privilege: oracledb.SYSDBA
+        });
+
+        // Fetch user details
+        const result1 = await connection.execute(
+            `INSERT INTO guidePosts (user_id, email, rating, review) VALUES (:user_id,:email, :rating, :review)`,
+            { user_id: req.user.userid, email:req.user.email, rating: req.body.rating, review: req.body.review},
+            { autoCommit: true }
+        );
+        // const result2 = await connection.execute(
+        //     `UPDATE users SET rating = :rating WHERE email = :email`,
+        //     { rating: req.body.rating, email: req.user.email },
+        //     { autoCommit: true }
+        // );
+        const result3 = await connection.execute(
+            `UPDATE users SET review = :review WHERE email = :email`,
+            { review: req.body.review, email: req.user.email },
             { autoCommit: true }
         );
         const result = await connection.execute(
@@ -482,7 +544,7 @@ app.post('/rate', isLoggedIn, async (req, res) => {
         user.posts = postsResult.rows;
 
         // Set ticketBooked to true and re-render the profile page
-        res.render("rate",{user, ticketBooked: 1, rating: req.body.rating});
+        res.render("rate",{user, ticketBooked: 1, rating: req.body.rating, review: req.body.review});
     } catch (err) {
         console.error(err);
         res.status(500).send("Error booking ticket");

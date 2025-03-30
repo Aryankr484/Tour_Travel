@@ -11,10 +11,12 @@ async function createPost(postData) {
 
         const result = await connection.execute(
             
-            `INSERT INTO guidePosts (user_id, rating) VALUES (:user_id, :rating)`,
+            `INSERT INTO guidePosts (user_id, email, rating, review) VALUES (:user_id,:email, :rating, :review)`,
             {
                 user_id: postData.user_id,
-                rating: postData.rating
+                rating: postData.rating,
+                email: postData.email,
+                review: postData.review
             },
             { autoCommit: true }
         );
