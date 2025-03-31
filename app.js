@@ -33,7 +33,9 @@ async function isLoggedIn(req, res, next) {
 app.get('/', (req, res) => {
     res.render("index");
 });
-
+app.get('/example', (req, res) => {
+    res.render("example");
+});
 app.get('/profile/upload', isLoggedIn, (req, res) => {
     res.render("profileupload");
 });
@@ -452,10 +454,11 @@ app.post('/delete-ticket', isLoggedIn, async (req, res) => {
 
         // Delete all associated passenger details from the posts table
         await connection.execute(
-            `DELETE FROM posts WHERE user_id = :user_id`,
+            `DELETE FROM guidePosts WHERE user_id = :user_id`,
             { user_id: req.user.userid },
             { autoCommit: true }
         );
+
 
         res.redirect('/profile'); // Redirect back to the profile page
     } catch (err) {
