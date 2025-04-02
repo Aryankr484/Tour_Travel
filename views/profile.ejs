@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link
+    href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css"
+    rel="stylesheet"/>
 </head>
 <body>
     <div class="w-full min-h-screen bg-zinc-900 text-white text-white p-10">
@@ -19,7 +22,8 @@
         </div>
 
         <% if (!ticketBooked) { %>
-            <h5>Enter the Details of the passengers</h5>
+            
+            <h5 class="text-lg mb-2">Enter the Details of the passengers</h5>
             <form method="post" action="/post">
                 <input placeholder="name" type="text" class="bg-transparent w-40 px-2 mb-2 py-2 border-2 rounded-lg border-zinc-700 outline-none" name="name" id="name">
                 <input placeholder="age" type="number" class="bg-transparent w-40 px-2 mb-2 py-2 border-2 rounded-lg border-zinc-700 outline-none" name="age" id="age">

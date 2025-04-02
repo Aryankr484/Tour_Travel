@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+    <div class="w-full min-h-screen bg-zinc-900 text-white p-10">
+        <h1 class="text-center mb-5 text-3xl font-bold">JourneySphere Travel Co.</h1>
+        
+
+        <!-- Display Alert Message -->
+        <% if (typeof message !== 'undefined') { %>
+            <% if(isSuccess){ %>
+                <div class="bg-green-500 text-white p-3 rounded-md mb-5" id="alert-box">
+                    <%= message %>
+                </div>
+               
+                <h3 class="mb-2 text-3xl">Login Your Account</h3>
+                <form action="/login" method="post">
+                    <input class="bg-transparent px-2 py-2 border-2 rounded-lg border-zinc-700 outline-none" type="email" placeholder="email" name="email" required>
+                    <input class="bg-transparent px-2 py-2 border-2 rounded-lg border-zinc-700 outline-none" type="password" placeholder="password" name="password" required>
+                    <input class="bg-blue-600 px-2 py-2 rounded-md text-center" type="submit" value="Login Account">
+                </form>
+
+            <%}else{%>
+                <h3 class="mb-2 text-3xl">Register Your Account</h3>
+                <div class="bg-red-500 text-white p-3 rounded-md mb-5" id="alert-box">
+                    <%= message %>
+                </div>
+                <form action="/register" method="post">
+                    <input class="bg-transparent px-2 py-2 border-2 rounded-lg border-zinc-700 outline-none mb-3" type="text" placeholder="Username" name="username" required>
+                    <input class="bg-transparent px-2 py-2 border-2 rounded-lg border-zinc-700 outline-none mb-3" type="text" placeholder="Name" name="name" required>
+                    <input class="bg-transparent px-2 py-2 border-2 rounded-lg border-zinc-700 outline-none mb-3" type="number" placeholder="Age" name="age" required>
+                    <input class="bg-transparent px-2 py-2 border-2 rounded-lg border-zinc-700 outline-none mb-3" type="email" placeholder="Email" name="email" required>
+                    <input class="bg-transparent px-2 py-2 border-2 rounded-lg border-zinc-700 outline-none mb-3" type="text" placeholder="Gender" name="gender" required>
+                    <input class="bg-transparent px-2 py-2 border-2 rounded-lg border-zinc-700 outline-none mb-3" type="number" placeholder="Phone" name="phone" required>
+                    <input class="bg-transparent px-2 py-2 border-2 rounded-lg border-zinc-700 outline-none mb-3" type="password" placeholder="Password" name="password" required>
+                    <input class="bg-blue-600 px-2 py-2 rounded-md text-center" type="submit" value="Register Account">
+                </form>
+                <span><h3 class="inline-block mr-3">Alreay a user?</h3></span><a class="bg-green-500 rounded-md px-3 py-1 mb-5 inline-block" href="/login">Login</a>
+            <%}%>
+            <script>
+                // Automatically hide the alert after 5 seconds
+                setTimeout(() => {
+                    const alertBox = document.getElementById('alert-box');
+                    if (alertBox) {
+                        alertBox.style.display = 'none';
+                    }
+                }, 3000);
+            </script>
+        <% } %>
+
+        <!-- Registration Form -->
+        
+    </div>
+</body>
+</html>
