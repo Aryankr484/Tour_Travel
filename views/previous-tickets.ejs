@@ -16,6 +16,9 @@
                     <th class="border border-gray-300 px-4 py-2">From</th>
                     <th class="border border-gray-300 px-4 py-2">To</th>
                     <th class="border border-gray-300 px-4 py-2">Date</th>
+                    <th class="border border-gray-300 px-4 py-2">Rating</th>
+                    <th class="border border-gray-300 px-4 py-2">Review</th>
+                    <th class="border border-gray-300 px-4 py-2">Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -25,6 +28,8 @@
                             <td class="border border-gray-300 px-4 py-2"><%= ticket.FR_ %></td>
                             <td class="border border-gray-300 px-4 py-2"><%= ticket.TO_ %></td>
                             <td class="border border-gray-300 px-4 py-2"><%= ticket.TICKET_DATE %></td>
+                            <td class="border border-gray-300 px-4 py-2"><%= ticket.RATING ? ticket.RATING + '/5' : 'N/A' %></td>
+                            <td class="border border-gray-300 px-4 py-2"><%= ticket.REVIEW || 'No review' %></td>
                             <td class="border border-gray-300 px-4 py-2">
                                 <form method="post" action="/delete-previous-ticket">
                                     <input type="hidden" name="ticket_id" value="<%= ticket.ID %>">
@@ -35,7 +40,7 @@
                     <% }); %>
                 <% } else { %>
                     <tr>
-                        <td colspan="4" class="text-center border border-gray-300 px-4 py-2">No previous tickets found</td>
+                        <td colspan="6" class="text-center border border-gray-300 px-4 py-2">No previous tickets found</td>
                     </tr>
                 <% } %>
             </tbody>

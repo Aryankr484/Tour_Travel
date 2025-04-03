@@ -15,6 +15,7 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+const axios = require('axios');
 
 async function isLoggedIn(req, res, next) {
     const token = req.cookies.token;
@@ -36,6 +37,53 @@ app.get('/', (req, res) => {
 // app.get('/example', (req, res) => {
 //     res.render("example");
 // });
+app.get('/api/city', async (req, res) => {
+    const cityName = req.query.name || 'San Francisco'; // Get the city name from query parameters (default: San Francisco)
+    const apiKey = 'cLifNixbrSCiFoHolpPTNaIJ93GKgGrAtCzHYYLJ'; // Hardcoded API key
+
+    try {
+        // Make a GET request to the external API
+        const response = await axios.get(`https://api.api-ninjas.com/v1/city`, {
+            headers: {
+                'X-Api-Key': apiKey // Pass the API key in the headers
+            },
+            params: {
+                name: cityName // Pass the city name as a query parameter
+            }
+        });
+
+        // Send the API response back to the client
+        res.json({ success: true, data: response.data });
+    } catch (err) {
+        console.error('Error fetching city data:', err.response?.data || err.message);
+        res.status(500).json({ success: false, message: 'Error fetching city data' });
+    }
+});
+
+app.get('/api/city-suggestions', async (req, res) => {
+    const query = req.query.name || ''; // Get the query from the request
+    const apiKey = 'cLifNixbrSCiFoHolpPTNaIJ93GKgGrAtCzHYYLJ'; // API key
+
+    try {
+        // Fetch city suggestions from the external API
+        const response = await axios.get(`https://api.api-ninjas.com/v1/city`, {
+            headers: {
+                'X-Api-Key': apiKey
+            },
+            params: {
+                name: query
+            }
+        });
+
+        res.json({ success: true, cities: response.data });
+    } catch (err) {
+        console.error('Error fetching city suggestions:', err.response?.data || err.message);
+        res.status(500).json({ success: false, message: 'Error fetching city suggestions' });
+    }
+});
+// Start the server
+
+
 app.get('/profile/upload', isLoggedIn, (req, res) => {
     res.render("profileupload");
 });
@@ -257,7 +305,10 @@ app.get('/previous-tickets', isLoggedIn, async (req, res) => {
 
         // Fetch all previous tickets for the logged-in user
         const ticketsResult = await connection.execute(
-            `SELECT * FROM tickets WHERE user_id = :user_id ORDER BY ticket_date DESC`,
+            `SELECT id, fr_, to_, ticket_date, rating, review 
+             FROM tickets 
+             WHERE user_id = :user_id 
+             ORDER BY ticket_date DESC`,
             { user_id: req.user.userid }
         );
 
@@ -656,7 +707,7 @@ app.post('/submit', isLoggedIn, async (req, res) => {
 });
 
 app.post('/rate', isLoggedIn, async (req, res) => {
-    let { fr_, to_ } = req.body;
+    const { fr_, to_, rating, review } = req.body; // Extract rating and review from the request body
     let connection;
     try {
         connection = await oracledb.getConnection({
@@ -665,7 +716,15 @@ app.post('/rate', isLoggedIn, async (req, res) => {
             connectString: 'localhost/orcl',
             privilege: oracledb.SYSDBA
         });
-
+        await connection.execute(
+            `UPDATE tickets 
+             SET rating = :rating, review = :review 
+             WHERE user_id = :user_id AND fr_ = :fr_ AND to_ = :to_ AND ticket_date = (
+                 SELECT MAX(ticket_date) FROM tickets WHERE user_id = :user_id
+             )`,
+            { user_id: req.user.userid, fr_, to_, rating, review },
+            { autoCommit: true }
+        );
         // Fetch user details
         const result1 = await connection.execute(
             `INSERT INTO guidePosts (user_id, email, rating, review) VALUES (:user_id,:email, :rating, :review)`,
@@ -701,7 +760,7 @@ app.post('/rate', isLoggedIn, async (req, res) => {
         user.posts = postsResult.rows;
 
         // Set ticketBooked to true and re-render the profile page
-        res.render("rate",{user, ticketBooked: 1, rating: req.body.rating, review: req.body.review, fr_, to_});
+        res.redirect('/previous-tickets'); // Redirect to the previous tickets page
     } catch (err) {
         console.error(err);
         res.status(500).send("Error booking ticket");

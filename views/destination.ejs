@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Destination</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link
     href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css"
     rel="stylesheet"/>
 </head>
 <body>
-    <div class="w-full min-h-screen bg-zinc-900 text-white text-white p-10">
+    <div class="w-full min-h-screen bg-zinc-900 text-white p-10">
         <div class="w-full flex justify-end">
             <a class="bg-red-500 rounded-md px-3 py-1 mb-5 inline-block" href="/logout">Logout</a>
         </div>
@@ -20,12 +20,95 @@
             </div>
             <h3 class="text-3xl"><span class="font-light">Hello</span>, <%= user.NAME %>👋</h3>
         </div>
-    <h1 class="text-xl mb-5 mt-10">Enter the Boarding and Destination</h1>
-    <form class="flex items-center" action="/submit" method="post">
-        <input placeholder="From" type="text" class="bg-transparent w-40 px-2 mb-2 mr-10 py-2 border-2 rounded-lg border-zinc-700 outline-none" name="fr_" id="From">
-        <i class="text-xl ri-arrow-left-right-fill"></i>
-        <input placeholder="To" type="text" class="bg-transparent w-40 px-2 mb-2 ml-10 py-2 border-2 rounded-lg border-zinc-700 outline-none" name="to_" id="To">
-        <input class='px-3 w-40 text-sm py-2 bg-blue-500 block rounded-md mb-2 ml-10' type="submit" value="Book">
-    </form>
+        <h1 class="text-xl mb-5 mt-10">Enter the Boarding and Destination</h1>
+        <form class="flex flex-col" action="/submit" method="post">
+            <div class="flex items-center gap-10">
+                <div class="relative">
+                    <input placeholder="From" type="text" class="bg-transparent w-40 px-2 mb-2 mr-10 py-2 border-2 rounded-lg border-zinc-700 outline-none" name="fr_" id="fromInput" autocomplete="off">
+                    <ul id="fromSuggestions" class="absolute bg-white text-black w-40 mt-1 rounded-md shadow-lg hidden"></ul>
+                </div>
+                <i class="text-xl ri-arrow-left-right-fill"></i>
+                <div class="relative">
+                    <input placeholder="To" type="text" class="bg-transparent w-40 px-2 mb-2 ml-10 py-2 border-2 rounded-lg border-zinc-700 outline-none" name="to_" id="toInput" autocomplete="off">
+                    <ul id="toSuggestions" class="absolute bg-white text-black w-40 mt-1 rounded-md shadow-lg hidden"></ul>
+                </div>
+
+            </div>
+            <h2 class="text-lg mt-5 mb-2">Mode of Transport</h2>
+            <div class="flex flex-wrap gap-4 mb-4">
+                <label class="flex items-center">
+                    <input type="radio" name="mode" value="Car" class="mr-2">
+                    Car
+                </label>
+                <label class="flex items-center">
+                    <input type="radio" name="mode" value="Bus" class="mr-2">
+                    Bus
+                </label>
+                <label class="flex items-center">
+                    <input type="radio" name="mode" value="Train" class="mr-2">
+                    Train
+                </label>
+                <label class="flex items-center">
+                    <input type="radio" name="mode" value="Flight" class="mr-2">
+                    Flight
+                </label>
+            </div>
+            <input class='px-3 w-40 text-sm py-2 bg-blue-500 block rounded-md mb-2 mt-10' type="submit" value="Book">
+        </form>
+        
+    </div>
+
+
+    <script>
+        async function fetchSuggestions(inputId, suggestionsId) {
+            const input = document.getElementById(inputId);
+            const suggestions = document.getElementById(suggestionsId);
+
+            input.addEventListener('input', async () => {
+                const query = input.value.trim();
+                if (query.length < 2) {
+                    suggestions.innerHTML = '';
+                    suggestions.classList.add('hidden');
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`/api/city-suggestions?name=${query}`);
+                    const data = await response.json();
+
+                    if (data.success) {
+                        suggestions.innerHTML = data.cities
+                            .map(city => `<li class="px-2 py-1 cursor-pointer hover:bg-gray-200">${city.name}</li>`)
+                            .join('');
+                        suggestions.classList.remove('hidden');
+
+                        // Add click event to suggestions
+                        Array.from(suggestions.children).forEach(item => {
+                            item.addEventListener('mousedown', (e) => {
+                                e.preventDefault(); // Prevent blur event from clearing the suggestions
+                                input.value = item.textContent;
+                                suggestions.innerHTML = '';
+                                suggestions.classList.add('hidden');
+                            });
+                        });
+                    }
+                } catch (err) {
+                    console.error('Error fetching suggestions:', err);
+                }
+            });
+
+            // Hide suggestions when input loses focus
+            input.addEventListener('blur', () => {
+                setTimeout(() => {
+                    suggestions.innerHTML = '';
+                    suggestions.classList.add('hidden');
+                }, 100);
+            });
+        }
+
+        // Initialize autocomplete for "From" and "To" inputs
+        fetchSuggestions('fromInput', 'fromSuggestions');
+        fetchSuggestions('toInput', 'toSuggestions');
+    </script>
 </body>
 </html>
