@@ -245,6 +245,38 @@ app.get('/delete/:id', isLoggedIn, async (req, res) => {
         }
     }
 });
+app.get('/previous-tickets', isLoggedIn, async (req, res) => {
+    let connection;
+    try {
+        connection = await oracledb.getConnection({
+            user: 'sys',
+            password: 'Aryan2023030#',
+            connectString: 'localhost/orcl',
+            privilege: oracledb.SYSDBA
+        });
+
+        // Fetch all previous tickets for the logged-in user
+        const ticketsResult = await connection.execute(
+            `SELECT * FROM tickets WHERE user_id = :user_id ORDER BY ticket_date DESC`,
+            { user_id: req.user.userid }
+        );
+
+        const tickets = ticketsResult.rows || []; // Ensure tickets is always an array
+
+        res.render("previous-tickets", { tickets });
+    } catch (err) {
+        console.error("Error in /previous-tickets route:", err);
+        res.status(500).send("Error fetching previous tickets");
+    } finally {
+        if (connection) {
+            try {
+                await connection.close();
+            } catch (err) {
+                console.error(err);
+            }
+        }
+    }
+});
 
 app.post('/register', async (req, res) => {
     let { email, password, username, name, age, gender, phone } = req.body;
@@ -418,6 +450,11 @@ app.post('/confirm', isLoggedIn, async (req, res) => {
 
         // Update the ticketBooked status in the database
         await connection.execute(
+            `INSERT INTO tickets (user_id, fr_, to_) VALUES (:user_id, :fr_, :to_)`,
+            { user_id: req.user.userid, fr_, to_ },
+            { autoCommit: true }
+        );
+        await connection.execute(
             `UPDATE users SET ticketBooked = 1 WHERE email = :email`,
             { email: req.user.email },
             { autoCommit: true }
@@ -439,6 +476,7 @@ app.post('/confirm', isLoggedIn, async (req, res) => {
 
         // Render the profile page with ticketBooked set to true
         res.render("rate", { user, ticketBooked: true,  rating:req.body.rating, review:req.body.review, fr_, to_});
+        // res.redirect('/profile');
     } catch (err) {
         console.error(err);
         res.status(500).send("Error Booking Ticket");
@@ -507,6 +545,11 @@ app.post('/delete-ticket', isLoggedIn, async (req, res) => {
         // Delete all associated passenger details from the posts table
         await connection.execute(
             `DELETE FROM guidePosts WHERE user_id = :user_id`,
+            { user_id: req.user.userid },
+            { autoCommit: true }
+        );
+        await connection.execute(
+            `DELETE FROM posts WHERE user_id = :user_id`,
             { user_id: req.user.userid },
             { autoCommit: true }
         );
@@ -672,7 +715,38 @@ app.post('/rate', isLoggedIn, async (req, res) => {
         }
     }
 });
+app.post('/delete-previous-ticket', isLoggedIn, async (req, res) => {
+    const { ticket_id } = req.body; // Extract the ticket ID from the request body
+    let connection;
+    try {
+        connection = await oracledb.getConnection({
+            user: 'sys',
+            password: 'Aryan2023030#',
+            connectString: 'localhost/orcl',
+            privilege: oracledb.SYSDBA
+        });
 
+        // Delete the ticket with the specified ID
+        await connection.execute(
+            `DELETE FROM tickets WHERE id = :ticket_id`,
+            { ticket_id },
+            { autoCommit: true }
+        );
+
+        res.redirect('/previous-tickets'); // Redirect back to the previous tickets page
+    } catch (err) {
+        console.error("Error in /delete-previous-ticket route:", err);
+        res.status(500).send("Error deleting ticket");
+    } finally {
+        if (connection) {
+            try {
+                await connection.close();
+            } catch (err) {
+                console.error(err);
+            }
+        }
+    }
+});
 
 
 // app.post('/review', isLoggedIn, async (req, res) => {

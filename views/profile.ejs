@@ -35,13 +35,15 @@
               <p>From: <span class="text-green-500"><%= fr_ %></span></p>
               <p>To: <span class="text-green-500"><%= to_ %></span></p>
           </div>
+          <a href="/previous-tickets" class="bg-blue-500 px-3 py-2 rounded-md text-white mb-4 mt-5 inline-block">View Previous Tickets</a>
+          
           <form method="post" action="/confirm">
               <input type="hidden" name="fr_" value="<%= fr_ %>">
               <input type="hidden" name="to_" value="<%= to_ %>">
-              <button class="bg-blue-500 px-4 py-2 rounded-md text-white">Confirm Booking</button>
+              
+                <button class="bg-blue-500 px-4 py-2 rounded-md text-white">Confirm Booking</button>
           </form>
         </div>
-        <% if (!ticketBooked) { %>
             
             <h5 class="text-lg mb-2">Enter the Details of the passengers</h5>
             <form method="post" action="/post">
@@ -51,9 +53,7 @@
                 <input placeholder="phone" type="number" class="bg-transparent w-40 px-2 mb-2 py-2 border-2 rounded-lg border-zinc-700 outline-none" name="phone" id="phone">
                 <input class='px-3 w-40 text-sm py-2 bg-blue-500 block rounded-md mt-2' type="submit" value="Add passengers">
             </form>
-        <% } else { %>
-            <h5 class="text-green-500 text-xl">Ticket Booked</h5>
-        <% } %>
+        
 
         <table class="table-auto border-collapse w-full border border-gray-300 mt-5">
             <thead>
@@ -77,7 +77,7 @@
               <% }); %>
             </tbody>
         </table>
-        <form method="post" action="/confirm">
+        <!-- <form method="post" action="/confirm">
           <%if(!ticketBooked){%>
            
           <%} else{%>
@@ -97,13 +97,13 @@
               <%}%>
           <%}%>
           
-        </form>
+        </form> -->
         
         
         <% if (ticketBooked) { %>
           <form method="post" action="/delete-ticket">
               <button class="px-3 w-40 text-sm py-2 bg-red-500 text-white block rounded-md mt-2" type="submit">
-                  Delete Ticket
+                  Clear
               </button>
           </form>
       <% } %>

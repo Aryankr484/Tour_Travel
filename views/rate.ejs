@@ -68,12 +68,11 @@
                                 <input type="hidden" name="rating" id="rating-input">
                                 <input type="hidden" name="fr_" value="<%= fr_ %>">
                                 <input type="hidden" name="to_" value="<%= to_ %>">
-                                <button type="submit" class="px-3 ml-3 py-2 bg-blue-500 text-white rounded-md">Submit Rating</button>
                             </div>
 
                             <div class="flex flex-col w-[300px] items-center">
                                 <textarea placeholder="Add your thoughts here" class="bg-transparent w-40 px-2 mt-5 py-2 border-2 rounded-lg border-zinc-700 outline-none w-[300px] h-[100px] resize-none" name="review" id="review-input"><%= review || '' %></textarea>
-                                <button type="submit" class="px-3 mt-2 py-2 bg-blue-500 text-white rounded-md w-2/3 ml-5">Submit Review</button>
+                                <button type="submit" class="px-3 mt-2 py-2 bg-blue-500 text-white rounded-md w-2/3 ml-5">Rate/Review</button>
                             </div>
                         </form>
                     <% } else { %>
