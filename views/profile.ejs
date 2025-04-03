@@ -20,7 +20,27 @@
             </div>
             <h3 class="text-3xl"><span class="font-light">Hello</span>, <%= user.NAME %>👋</h3>
         </div>
-
+        <div class="flex gap-10 items-center mb-5">
+          <!-- <div>
+            <h1 class="text-gray-400">From</h1>
+            <h1 class="text-xl"><%= fr_ %></h1>
+          </div>
+          <span ><svg class="w-10" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="rgba(255,251,251,1)"><path d="M1.99974 13.0001L1.9996 11.0002L18.1715 11.0002L14.2218 7.05044L15.636 5.63623L22 12.0002L15.636 18.3642L14.2218 16.9499L18.1716 13.0002L1.99974 13.0001Z"></path></svg></span>
+          <div>
+            <h1 class="text-gray-400">To</h1>
+            <h1 class="text-xl"><%= to_ %></h1>
+          </div> -->
+          <div class="flex gap-10 items-center">
+            <h4 class="text-xl">Your Journey:</h4>
+              <p>From: <span class="text-green-500"><%= fr_ %></span></p>
+              <p>To: <span class="text-green-500"><%= to_ %></span></p>
+          </div>
+          <form method="post" action="/confirm">
+              <input type="hidden" name="fr_" value="<%= fr_ %>">
+              <input type="hidden" name="to_" value="<%= to_ %>">
+              <button class="bg-blue-500 px-4 py-2 rounded-md text-white">Confirm Booking</button>
+          </form>
+        </div>
         <% if (!ticketBooked) { %>
             
             <h5 class="text-lg mb-2">Enter the Details of the passengers</h5>
@@ -59,7 +79,7 @@
         </table>
         <form method="post" action="/confirm">
           <%if(!ticketBooked){%>
-            <input class='px-3 w-40 text-sm py-2 bg-blue-500 block rounded-md mt-2' type="submit" value="Book Ticket">
+           
           <%} else{%>
             <input class='px-3 w-40 invisible text-sm py-2 bg-gray-300 block rounded-md mt-2' type="submit" value="Ticket Booked">
             <h3 class="text-xl">Your rated:-</h3>

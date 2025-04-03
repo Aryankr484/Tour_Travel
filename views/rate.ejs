@@ -18,7 +18,7 @@
                 </div>
                 <h3 class="text-3xl"><span class="font-light">Hello</span>, <%= user.NAME %>👋</h3>
             </div>
-    
+            
             <h5 class="text-green-500 text-xl">Ticket Booked</h5>
             
     
@@ -51,7 +51,9 @@
         <%if(ticketBooked) {%>
             <div class="mt-10">
                 <h5 class="text-xl mb-3">Rate Your Experience</h5>
-            
+                <h4 class="text-xl mb-3">Your Journey:</h4>
+    <p class="mb-5">From: <span class="text-green-500"><%= fr_ %></span></p>
+    <p class="mb-5">To: <span class="text-green-500"><%= to_ %></span></p>
                 <div>
                     <% if (!rating && !review) { %>
                         <!-- Star Rating -->
@@ -64,6 +66,8 @@
                         <form class="flex flex-col" id="rating-form" method="post" action="/rate" class="mt-3">
                             <div class="flex flex-row">
                                 <input type="hidden" name="rating" id="rating-input">
+                                <input type="hidden" name="fr_" value="<%= fr_ %>">
+                                <input type="hidden" name="to_" value="<%= to_ %>">
                                 <button type="submit" class="px-3 ml-3 py-2 bg-blue-500 text-white rounded-md">Submit Rating</button>
                             </div>
 

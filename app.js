@@ -45,9 +45,10 @@ app.get('/register', isLoggedIn, (req, res) => {
 app.get('/login', (req, res) => {
     res.render("login");
 });
-app.get('/destination', isLoggedIn, async(req, res)=>{
+app.get('/destination', isLoggedIn, async (req, res) => {
     let connection;
     try {
+        console.log("User email:", req.user.email); // Debugging
         connection = await oracledb.getConnection({
             user: 'sys',
             password: 'Aryan2023030#',
@@ -55,7 +56,7 @@ app.get('/destination', isLoggedIn, async(req, res)=>{
             privilege: oracledb.SYSDBA
         });
 
-        // Fetch user details, including ticketBooked status and rating
+        // Fetch user details
         const result = await connection.execute(
             `SELECT * FROM users WHERE email = :email`,
             { email: req.user.email }
@@ -74,60 +75,9 @@ app.get('/destination', isLoggedIn, async(req, res)=>{
         );
         user.posts = postsResult.rows;
 
-       
-
-        res.render("destination", { user});
+        res.render("destination", { user });
     } catch (err) {
-        console.error(err);
-        res.status(500).send("Error fetching profile");
-    } finally {
-        if (connection) {
-            try {
-                await connection.close();
-            } catch (err) {
-                console.error(err);
-            }
-        }
-    }
-})
-app.get('/profile', isLoggedIn, async (req, res) => {
-    let connection;
-    try {
-        connection = await oracledb.getConnection({
-            user: 'sys',
-            password: 'Aryan2023030#',
-            connectString: 'localhost/orcl',
-            privilege: oracledb.SYSDBA
-        });
-
-        // Fetch user details, including ticketBooked status and rating
-        const result = await connection.execute(
-            `SELECT * FROM users WHERE email = :email`,
-            { email: req.user.email }
-        );
-
-        if (result.rows.length === 0) {
-            return res.status(404).send("User not found");
-        }
-
-        const user = result.rows[0];
-
-        // Fetch posts associated with the user
-        const postsResult = await connection.execute(
-            `SELECT * FROM posts WHERE user_id = :user_id`,
-            { user_id: user.ID }
-        );
-        user.posts = postsResult.rows;
-
-        // Pass the ticketBooked status and rating to the profile page
-        const ticketBooked = user.TICKETBOOKED === 1;
-        const rating = user.RATING;
-        const review = user.REVIEW;
-
-
-        res.render("profile", { user, ticketBooked, rating,review });
-    } catch (err) {
-        console.error(err);
+        console.error("Error in /destination route:", err);
         res.status(500).send("Error fetching profile");
     } finally {
         if (connection) {
@@ -139,7 +89,60 @@ app.get('/profile', isLoggedIn, async (req, res) => {
         }
     }
 });
+app.get('/profile', isLoggedIn, async (req, res) => {
+    let connection;
+    try {
+        connection = await oracledb.getConnection({
+            user: 'sys',
+            password: 'Aryan2023030#',
+            connectString: 'localhost/orcl',
+            privilege: oracledb.SYSDBA
+        });
+
+        // Fetch user details
+        const userResult = await connection.execute(
+            `SELECT * FROM users WHERE email = :email`,
+            { email: req.user.email }
+        );
+
+        if (userResult.rows.length === 0) {
+            return res.status(404).send("User not found");
+        }
+
+        const user = userResult.rows[0];
+
+        // Fetch posts associated with the user
+        const postsResult = await connection.execute(
+            `SELECT * FROM posts WHERE user_id = :user_id`,
+            { user_id: user.ID }
+        );
+        const locationResult = await connection.execute(
+            `SELECT fr_, to_ FROM locations WHERE user_id = :user_id ORDER BY id DESC FETCH FIRST 1 ROWS ONLY`,
+            { user_id: user.ID }
+        );
+        const location = locationResult.rows[0] || { fr_: null, to_: null };
+        user.posts = postsResult.rows||[]; // Ensure posts is always an array
+
+        const ticketBooked = user.TICKETBOOKED === 1;
+        const rating = user.RATING;
+        const review = user.REVIEW;
+
+        res.render("profile", { user, ticketBooked,rating,review, fr_: location.FR_, to_: location.TO_});
+    } catch (err) {
+        console.error("Error in /profile route:", err);
+        res.status(500).send("Error fetching profile");
+    } finally {
+        if (connection) {
+            try {
+                await connection.close();
+            } catch (err) {
+                console.error("Error closing database connection:", err);
+            }
+        }
+    }
+});
 app.get('/rate', isLoggedIn, async (req, res) => {
+    let { fr_, to_ } = req.body;
     let connection;
     try {
         connection = await oracledb.getConnection({
@@ -171,7 +174,7 @@ app.get('/rate', isLoggedIn, async (req, res) => {
         user.posts = postsResult.rows;
 
         // Render the rate page with the user's rating and review
-        res.render("rate", { user, ticketBooked: user.TICKETBOOKED === 1, rating, review });
+        res.render("rate", { user, ticketBooked: user.TICKETBOOKED === 1, rating, review,fr_, to_ });
     } catch (err) {
         console.error(err);
         res.status(500).send("Error loading rate page");
@@ -382,10 +385,9 @@ app.post('/login', async (req, res) => {
             user.posts = postsResult.rows;
 
             // Pass the ticketBooked status and rating to the profile page
-            const ticketBooked = user.TICKETBOOKED === 1;
-            const rating = user.RATING; 
-            const review = user.REVIEW;// Fetch the rating from the user object
-            res.render("profile", { user, ticketBooked, rating, review });
+            // Fetch the rating from the user object
+            res.render("destination",{user});
+           
         } else {
             res.status(401).send("Invalid credentials");
         }
@@ -404,7 +406,7 @@ app.post('/login', async (req, res) => {
 });
 
 app.post('/confirm', isLoggedIn, async (req, res) => {
-    
+    let{fr_, to_} = req.body;
     let connection;
     try {
         connection = await oracledb.getConnection({
@@ -436,7 +438,7 @@ app.post('/confirm', isLoggedIn, async (req, res) => {
         user.posts = postsResult.rows;
 
         // Render the profile page with ticketBooked set to true
-        res.render("rate", { user, ticketBooked: true,  rating:req.body.rating, review:req.body.review});
+        res.render("rate", { user, ticketBooked: true,  rating:req.body.rating, review:req.body.review, fr_, to_});
     } catch (err) {
         console.error(err);
         res.status(500).send("Error Booking Ticket");
@@ -539,7 +541,8 @@ app.post('/post', isLoggedIn, async (req, res) => {
             { user_id: req.user.userid, name, age, gender, phone },
             { autoCommit: true }
         );
-        res.redirect("/profile");
+        
+        res.redirect('/profile');
     } catch (err) {
         console.error(err);
         res.status(500).send("Error creating post");
@@ -553,7 +556,64 @@ app.post('/post', isLoggedIn, async (req, res) => {
         }
     }
 });
+app.post('/submit', isLoggedIn, async (req, res) => {
+    let { fr_, to_ } = req.body;
+    let connection;
+    try {
+        connection = await oracledb.getConnection({
+            user: 'sys',
+            password: 'Aryan2023030#',
+            connectString: 'localhost/orcl',
+            privilege: oracledb.SYSDBA
+        });
+
+        // Insert into the locations table
+        const result = await connection.execute(
+            `INSERT INTO locations (user_id, fr_, to_) VALUES (:user_id, :fr_, :to_)`,
+            { user_id: req.user.userid, fr_, to_ },
+            { autoCommit: true }
+        );
+
+        // Fetch user details
+        const userResult = await connection.execute(
+            `SELECT * FROM users WHERE email = :email`,
+            { email: req.user.email }
+        );
+
+        if (userResult.rows.length === 0) {
+            return res.status(404).send("User not found");
+        }
+
+        const user = userResult.rows[0];
+
+        // Fetch posts associated with the user
+        const postsResult = await connection.execute(
+            `SELECT * FROM posts WHERE user_id = :user_id`,
+            { user_id: user.ID }
+        );
+        user.posts = postsResult.rows || []; // Ensure posts is always an array
+
+        const ticketBooked = user.TICKETBOOKED === 1;
+        const rating = user.RATING;
+        const review = user.REVIEW;
+        
+        res.render("profile", { user, ticketBooked, rating, review, fr_, to_ });
+    } catch (err) {
+        console.error("Error in /submit route:", err);
+        res.status(500).send("Error creating post");
+    } finally {
+        if (connection) {
+            try {
+                await connection.close();
+            } catch (err) {
+                console.error(err);
+            }
+        }
+    }
+});
+
 app.post('/rate', isLoggedIn, async (req, res) => {
+    let { fr_, to_ } = req.body;
     let connection;
     try {
         connection = await oracledb.getConnection({
@@ -598,7 +658,7 @@ app.post('/rate', isLoggedIn, async (req, res) => {
         user.posts = postsResult.rows;
 
         // Set ticketBooked to true and re-render the profile page
-        res.render("rate",{user, ticketBooked: 1, rating: req.body.rating, review: req.body.review});
+        res.render("rate",{user, ticketBooked: 1, rating: req.body.rating, review: req.body.review, fr_, to_});
     } catch (err) {
         console.error(err);
         res.status(500).send("Error booking ticket");
@@ -612,6 +672,7 @@ app.post('/rate', isLoggedIn, async (req, res) => {
         }
     }
 });
+
 
 
 // app.post('/review', isLoggedIn, async (req, res) => {
