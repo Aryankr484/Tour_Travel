@@ -11,11 +11,12 @@ async function createPost(postData) {
 
         const result = await connection.execute(
             
-            `INSERT INTO tickets (user_id, fr_, to_, ticket_date) VALUES (:user_id, :fr_, :to_, :ticket_date)`,
+            `INSERT INTO tickets (user_id, fr_, to_,mode_ ticket_date) VALUES (:user_id, :fr_, :to_,:mode_, :ticket_date)`,
             {
                 user_id: postData.user_id,
                 fr_: postData.fr_,
                 to_: postData.to_,
+                mode:postData.mode_,
                 ticket_date: postData.ticket_date
             },
             { autoCommit: true }

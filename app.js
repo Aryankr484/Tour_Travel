@@ -165,17 +165,17 @@ app.get('/profile', isLoggedIn, async (req, res) => {
             { user_id: user.ID }
         );
         const locationResult = await connection.execute(
-            `SELECT fr_, to_ FROM locations WHERE user_id = :user_id ORDER BY id DESC FETCH FIRST 1 ROWS ONLY`,
+            `SELECT fr_, to_,mode_ FROM locations WHERE user_id = :user_id ORDER BY id DESC FETCH FIRST 1 ROWS ONLY`,
             { user_id: user.ID }
         );
-        const location = locationResult.rows[0] || { fr_: null, to_: null };
+        const location = locationResult.rows[0] || { fr_: null, to_: null, mode_: null };
         user.posts = postsResult.rows||[]; // Ensure posts is always an array
 
         const ticketBooked = user.TICKETBOOKED === 1;
         const rating = user.RATING;
         const review = user.REVIEW;
 
-        res.render("profile", { user, ticketBooked,rating,review, fr_: location.FR_, to_: location.TO_});
+        res.render("profile", { user, ticketBooked,rating,review, fr_: location.FR_, to_: location.TO_, mode_: location.MODE_});
     } catch (err) {
         console.error("Error in /profile route:", err);
         res.status(500).send("Error fetching profile");
@@ -190,7 +190,7 @@ app.get('/profile', isLoggedIn, async (req, res) => {
     }
 });
 app.get('/rate', isLoggedIn, async (req, res) => {
-    let { fr_, to_ } = req.body;
+    let { fr_, to_, mode_ } = req.body;
     let connection;
     try {
         connection = await oracledb.getConnection({
@@ -222,7 +222,7 @@ app.get('/rate', isLoggedIn, async (req, res) => {
         user.posts = postsResult.rows;
 
         // Render the rate page with the user's rating and review
-        res.render("rate", { user, ticketBooked: user.TICKETBOOKED === 1, rating, review,fr_, to_ });
+        res.render("rate", { user, ticketBooked: user.TICKETBOOKED === 1, rating, review,fr_, to_, mode_ });
     } catch (err) {
         console.error(err);
         res.status(500).send("Error loading rate page");
@@ -305,7 +305,7 @@ app.get('/previous-tickets', isLoggedIn, async (req, res) => {
 
         // Fetch all previous tickets for the logged-in user
         const ticketsResult = await connection.execute(
-            `SELECT id, fr_, to_, ticket_date, rating, review 
+            `SELECT id, fr_, to_, mode_, ticket_date, rating, review 
              FROM tickets 
              WHERE user_id = :user_id 
              ORDER BY ticket_date DESC`,
@@ -489,7 +489,7 @@ app.post('/login', async (req, res) => {
 });
 
 app.post('/confirm', isLoggedIn, async (req, res) => {
-    let{fr_, to_} = req.body;
+    let{fr_, to_, mode_} = req.body;
     let connection;
     try {
         connection = await oracledb.getConnection({
@@ -501,8 +501,8 @@ app.post('/confirm', isLoggedIn, async (req, res) => {
 
         // Update the ticketBooked status in the database
         await connection.execute(
-            `INSERT INTO tickets (user_id, fr_, to_) VALUES (:user_id, :fr_, :to_)`,
-            { user_id: req.user.userid, fr_, to_ },
+            `INSERT INTO tickets (user_id, fr_, to_,mode_) VALUES (:user_id, :fr_, :to_, :mode_)`,
+            { user_id: req.user.userid, fr_, to_, mode_},
             { autoCommit: true }
         );
         await connection.execute(
@@ -526,7 +526,7 @@ app.post('/confirm', isLoggedIn, async (req, res) => {
         user.posts = postsResult.rows;
 
         // Render the profile page with ticketBooked set to true
-        res.render("rate", { user, ticketBooked: true,  rating:req.body.rating, review:req.body.review, fr_, to_});
+        res.render("rate", { user, ticketBooked: true,  rating:req.body.rating, review:req.body.review, fr_, to_, mode_});
         // res.redirect('/profile');
     } catch (err) {
         console.error(err);
@@ -651,7 +651,7 @@ app.post('/post', isLoggedIn, async (req, res) => {
     }
 });
 app.post('/submit', isLoggedIn, async (req, res) => {
-    let { fr_, to_ } = req.body;
+    let { fr_, to_, mode_ } = req.body;
     let connection;
     try {
         connection = await oracledb.getConnection({
@@ -663,8 +663,8 @@ app.post('/submit', isLoggedIn, async (req, res) => {
 
         // Insert into the locations table
         const result = await connection.execute(
-            `INSERT INTO locations (user_id, fr_, to_) VALUES (:user_id, :fr_, :to_)`,
-            { user_id: req.user.userid, fr_, to_ },
+            `INSERT INTO locations (user_id, fr_, to_, mode_) VALUES (:user_id, :fr_, :to_, :mode_)`,
+            { user_id: req.user.userid, fr_, to_,mode_ },
             { autoCommit: true }
         );
 
@@ -691,7 +691,7 @@ app.post('/submit', isLoggedIn, async (req, res) => {
         const rating = user.RATING;
         const review = user.REVIEW;
         
-        res.render("profile", { user, ticketBooked, rating, review, fr_, to_ });
+        res.render("profile", { user, ticketBooked, rating, review, fr_, to_, mode_});
     } catch (err) {
         console.error("Error in /submit route:", err);
         res.status(500).send("Error creating post");
@@ -707,7 +707,7 @@ app.post('/submit', isLoggedIn, async (req, res) => {
 });
 
 app.post('/rate', isLoggedIn, async (req, res) => {
-    const { fr_, to_, rating, review } = req.body; // Extract rating and review from the request body
+    const { fr_, to_,mode_, rating, review } = req.body; // Extract rating and review from the request body
     let connection;
     try {
         connection = await oracledb.getConnection({
@@ -719,10 +719,10 @@ app.post('/rate', isLoggedIn, async (req, res) => {
         await connection.execute(
             `UPDATE tickets 
              SET rating = :rating, review = :review 
-             WHERE user_id = :user_id AND fr_ = :fr_ AND to_ = :to_ AND ticket_date = (
+             WHERE user_id = :user_id AND fr_ = :fr_ AND to_ = :to_ AND mode_= :mode_ AND ticket_date = (
                  SELECT MAX(ticket_date) FROM tickets WHERE user_id = :user_id
              )`,
-            { user_id: req.user.userid, fr_, to_, rating, review },
+            { user_id: req.user.userid, fr_, to_,mode_, rating, review },
             { autoCommit: true }
         );
         // Fetch user details

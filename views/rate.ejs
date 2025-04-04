@@ -52,8 +52,10 @@
             <div class="mt-10">
                 <h5 class="text-xl mb-3">Rate Your Experience</h5>
                 <h4 class="text-xl mb-3">Your Journey:</h4>
-    <p class="mb-5">From: <span class="text-green-500"><%= fr_ %></span></p>
-    <p class="mb-5">To: <span class="text-green-500"><%= to_ %></span></p>
+                <p class="mb-5">From: <span class="text-green-500"><%= fr_ %></span></p>
+                <p class="mb-5">To: <span class="text-green-500"><%= to_ %></span></p>
+                <p class="mb-5">Mode: <span class="text-green-500"><%= mode_ %></span></p>
+            
                 <div>
                     <% if (!rating && !review) { %>
                         <!-- Star Rating -->
@@ -68,6 +70,8 @@
                                 <input type="hidden" name="rating" id="rating-input">
                                 <input type="hidden" name="fr_" value="<%= fr_ %>">
                                 <input type="hidden" name="to_" value="<%= to_ %>">
+                                <input type="hidden" name="mode_" value="<%= mode_ %>">
+
                             </div>
 
                             <div class="flex flex-col w-[300px] items-center">
@@ -78,6 +82,7 @@
                     <% } else { %>
                         <h5 class="text-xl mb-3">Your Rating: <%= rating %>★</h5>
                         <h5 class="text-xl mb-3">Your Review: <%= review %></h5>
+
                     <% } %>
                 </div>
             </div>

@@ -34,12 +34,15 @@
             <h4 class="text-xl">Your Journey:</h4>
               <p>From: <span class="text-green-500"><%= fr_ %></span></p>
               <p>To: <span class="text-green-500"><%= to_ %></span></p>
+              <p>Mode: <span class="text-green-500"><%= mode_ %></span></p>
+
           </div>
           <a href="/previous-tickets" class="bg-blue-500 px-3 py-2 rounded-md text-white mb-4 mt-5 inline-block">View Previous Tickets</a>
           
           <form method="post" action="/confirm">
               <input type="hidden" name="fr_" value="<%= fr_ %>">
               <input type="hidden" name="to_" value="<%= to_ %>">
+              <input type="hidden" name="mode_" value="<%= mode_ %>">
               
                 <button class="bg-blue-500 px-4 py-2 rounded-md text-white">Confirm Booking</button>
           </form>
