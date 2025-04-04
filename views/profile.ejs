@@ -3,113 +3,125 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Profile</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link
     href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css"
     rel="stylesheet"/>
 </head>
-<body>
-    <div class="w-full min-h-screen bg-zinc-900 text-white text-white p-10">
-        <div class="w-full flex justify-end">
-            <a class="bg-red-500 rounded-md px-3 py-1 mb-5 inline-block" href="/logout">Logout</a>
+<body class="bg-zinc-900 text-white min-h-screen">
+    <div class="container mx-auto p-10">
+        <!-- Logout Button -->
+        <div class="flex justify-end">
+            <a class="bg-red-500 hover:bg-red-600 transition px-4 py-2 rounded-md text-white" href="/logout">Logout</a>
         </div>
-        <div class="flex gap-4 mb-3">
-            <div class="h-10 w-10 rounded-md overflow-hidden">
-                <a href="profile/upload"><img class="w-full h-full object-cover" src="/images/uploads/<%= user.PROFILEPIC %>" alt=""></a>
+
+        <!-- User Greeting -->
+        <div class="flex items-center gap-4 mb-8">
+            <div class="h-16 w-16 rounded-full overflow-hidden">
+                <a href="profile/upload">
+                    <img class="w-full h-full object-cover" src="/images/uploads/<%= user.PROFILEPIC %>" alt="Profile Picture">
+                </a>
             </div>
-            <h3 class="text-3xl"><span class="font-light">Hello</span>, <%= user.NAME %>👋</h3>
+            <h3 class="text-3xl font-semibold">Hello, <span class="text-green-400"><%= user.NAME %></span> 👋</h3>
         </div>
-        <div class="flex gap-10 items-center mb-5">
-          <!-- <div>
-            <h1 class="text-gray-400">From</h1>
-            <h1 class="text-xl"><%= fr_ %></h1>
-          </div>
-          <span ><svg class="w-10" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="rgba(255,251,251,1)"><path d="M1.99974 13.0001L1.9996 11.0002L18.1715 11.0002L14.2218 7.05044L15.636 5.63623L22 12.0002L15.636 18.3642L14.2218 16.9499L18.1716 13.0002L1.99974 13.0001Z"></path></svg></span>
-          <div>
-            <h1 class="text-gray-400">To</h1>
-            <h1 class="text-xl"><%= to_ %></h1>
-          </div> -->
-          <div class="flex gap-10 items-center">
-            <h4 class="text-xl">Your Journey:</h4>
-              <p>From: <span class="text-green-500"><%= fr_ %></span></p>
-              <p>To: <span class="text-green-500"><%= to_ %></span></p>
-              <p>Mode: <span class="text-green-500"><%= mode_ %></span></p>
 
-          </div>
-          <a href="/previous-tickets" class="bg-blue-500 px-3 py-2 rounded-md text-white mb-4 mt-5 inline-block">View Previous Tickets</a>
-          
-          <form method="post" action="/confirm">
-              <input type="hidden" name="fr_" value="<%= fr_ %>">
-              <input type="hidden" name="to_" value="<%= to_ %>">
-              <input type="hidden" name="mode_" value="<%= mode_ %>">
-              
-                <button class="bg-blue-500 px-4 py-2 rounded-md text-white">Confirm Booking</button>
-          </form>
+        <!-- Journey Details -->
+        <div class="bg-zinc-800 p-6 rounded-lg shadow-md mb-8">
+            <h4 class="text-xl font-semibold mb-4">Your Journey:</h4>
+            <div class="flex flex-wrap gap-6">
+                <p>From: <span class="text-green-500 font-medium"><%= fr_ %></span></p>
+                <p>To: <span class="text-green-500 font-medium"><%= to_ %></span></p>
+                <p>Mode: <span class="text-green-500 font-medium"><%= mode_ %></span></p>
+            </div>
+            <div class="mt-6 flex gap-4">
+                <a href="/previous-tickets" class="bg-blue-500 hover:bg-blue-600 transition px-4 py-2 rounded-md text-white">View Previous Tickets</a>
+                <form method="post" action="/confirm">
+                    <input type="hidden" name="fr_" value="<%= fr_ %>">
+                    <input type="hidden" name="to_" value="<%= to_ %>">
+                    <input type="hidden" name="mode_" value="<%= mode_ %>">
+                    <button class="bg-green-500 hover:bg-green-600 transition px-4 py-2 rounded-md text-white">Confirm Booking</button>
+                </form>
+            </div>
         </div>
-            
-            <h5 class="text-lg mb-2">Enter the Details of the passengers</h5>
-            <form method="post" action="/post">
-                <input placeholder="name" type="text" class="bg-transparent w-40 px-2 mb-2 py-2 border-2 rounded-lg border-zinc-700 outline-none" name="name" id="name">
-                <input placeholder="age" type="number" class="bg-transparent w-40 px-2 mb-2 py-2 border-2 rounded-lg border-zinc-700 outline-none" name="age" id="age">
-                <input placeholder="gender" type="text" class="bg-transparent w-40 px-2 mb-2 py-2 border-2 rounded-lg border-zinc-700 outline-none" name="gender" id="gender">
-                <input placeholder="phone" type="number" class="bg-transparent w-40 px-2 mb-2 py-2 border-2 rounded-lg border-zinc-700 outline-none" name="phone" id="phone">
-                <input class='px-3 w-40 text-sm py-2 bg-blue-500 block rounded-md mt-2' type="submit" value="Add passengers">
+
+        <!-- Duration Selection -->
+        <div class="bg-zinc-800 p-6 rounded-lg shadow-md mb-8">
+            <h5 class="text-lg font-semibold mb-4">Select the Days and Nights to Stay</h5>
+            <div class="flex flex-wrap gap-4">
+                <label class="flex items-center">
+                    <input type="radio" name="duration" value="1 Day 1 Night" class="mr-2">
+                    1 Day 1 Night
+                </label>
+                <label class="flex items-center">
+                    <input type="radio" name="duration" value="2 Days 1 Night" class="mr-2">
+                    2 Days 1 Night
+                </label>
+                <label class="flex items-center">
+                    <input type="radio" name="duration" value="3 Days 2 Nights" class="mr-2">
+                    3 Days 2 Nights
+                </label>
+                <label class="flex items-center">
+                    <input type="radio" name="duration" value="4 Days 3 Nights" class="mr-2">
+                    4 Days 3 Nights
+                </label>
+                <label class="flex items-center">
+                    <input type="radio" name="duration" value="5 Days 4 Nights" class="mr-2">
+                    5 Days 4 Nights
+                </label>
+            </div>
+        </div>
+
+        <!-- Passenger Details Form -->
+        <div class="bg-zinc-800 p-6 rounded-lg shadow-md mb-8">
+            <h5 class="text-lg font-semibold mb-4">Enter the Details of the Passengers</h5>
+            <form method="post" action="/post" class="space-y-4">
+                <input placeholder="Name" type="text" class="bg-transparent w-full px-4 py-2 border-2 rounded-lg border-zinc-700 outline-none" name="name" id="name">
+                <input placeholder="Age" type="number" class="bg-transparent w-full px-4 py-2 border-2 rounded-lg border-zinc-700 outline-none" name="age" id="age">
+                <input placeholder="Gender" type="text" class="bg-transparent w-full px-4 py-2 border-2 rounded-lg border-zinc-700 outline-none" name="gender" id="gender">
+                <input placeholder="Phone" type="number" class="bg-transparent w-full px-4 py-2 border-2 rounded-lg border-zinc-700 outline-none" name="phone" id="phone">
+                <input class="px-4 py-2 bg-blue-500 hover:bg-blue-600 transition text-white rounded-md w-full" type="submit" value="Add Passenger">
             </form>
-        
+        </div>
 
-        <table class="table-auto border-collapse w-full border border-gray-300 mt-5">
-            <thead>
-              <tr class="bg-gray-400 text-black">
-                <th class="border border-gray-300 px-4 py-2">Name</th>
-                <th class="border border-gray-300 px-4 py-2">Age</th>
-                <th class="border border-gray-300 px-4 py-2">Gender</th>
-                <th class="border border-gray-300 px-4 py-2">Phone Number</th>
-              </tr>
-            </thead>
-            <tbody>
-              <% user.posts.forEach(function(post) { %>
-                <tr class="hover:bg-gray-600">
-                  <td class="border border-gray-300 px-4 py-2"><%= post.NAME %></td>
-                  <td class="border border-gray-300 px-4 py-2"><%= post.AGE %></td>
-                  <td class="border border-gray-300 px-4 py-2"><%= post.GENDER %></td>
-                  <td class="border border-gray-300 px-4 py-2"><%= post.PHONE %></td>
-                    <td class="border border-gray-300 px-4 py-2"><a class="text-zinc-400" href="/edit/<%= post.ID %>">edit</a></td>
-                    <td class="border border-gray-300 px-4 py-2"><a class="text-red-500" href="/delete/<%= post.ID %>">delete</a></td>
-                </tr>
-              <% }); %>
-            </tbody>
-        </table>
-        <!-- <form method="post" action="/confirm">
-          <%if(!ticketBooked){%>
-           
-          <%} else{%>
-            <input class='px-3 w-40 invisible text-sm py-2 bg-gray-300 block rounded-md mt-2' type="submit" value="Ticket Booked">
-            <h3 class="text-xl">Your rated:-</h3>
-          <% if (rating) { %>
-            <span class="text-green-500 text-xl"><%= rating %>★</span>
-          <% } else{ %>
-            <span class="text-gray-700 text-sm">No rating yet</span>
-            <%}%>
+        <!-- Passenger Table -->
+        <div class="bg-zinc-800 p-6 rounded-lg shadow-md">
+            <h5 class="text-lg font-semibold mb-4">Passenger List</h5>
+            <table class="table-auto border-collapse w-full border border-gray-300">
+                <thead>
+                    <tr class="bg-gray-400 text-black">
+                        <th class="border border-gray-300 px-4 py-2">Name</th>
+                        <th class="border border-gray-300 px-4 py-2">Age</th>
+                        <th class="border border-gray-300 px-4 py-2">Gender</th>
+                        <th class="border border-gray-300 px-4 py-2">Phone Number</th>
+                        <th class="border border-gray-300 px-4 py-2">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% user.posts.forEach(function(post) { %>
+                        <tr class="hover:bg-gray-600">
+                            <td class="border border-gray-300 px-4 py-2"><%= post.NAME %></td>
+                            <td class="border border-gray-300 px-4 py-2"><%= post.AGE %></td>
+                            <td class="border border-gray-300 px-4 py-2"><%= post.GENDER %></td>
+                            <td class="border border-gray-300 px-4 py-2"><%= post.PHONE %></td>
+                            <td class="border border-gray-300 px-4 py-2">
+                                <a class="text-blue-500 hover:underline" href="/edit/<%= post.ID %>">Edit</a> |
+                                <a class="text-red-500 hover:underline" href="/delete/<%= post.ID %>">Delete</a>
+                            </td>
+                        </tr>
+                    <% }); %>
+                </tbody>
+            </table>
+        </div>
 
-
-            <% if (review) { %>
-              <span class="text-blue-300 text-xl"><%= review %></span>
-            <% } else{ %>
-              <span class="text-gray-700 text-sm">No review yet</span>
-              <%}%>
-          <%}%>
-          
-        </form> -->
-        
-        
+        <!-- Clear Ticket Button -->
         <% if (ticketBooked) { %>
-          <form method="post" action="/delete-ticket">
-              <button class="px-3 w-40 text-sm py-2 bg-red-500 text-white block rounded-md mt-2" type="submit">
-                  Clear
-              </button>
-          </form>
-      <% } %>
+            <form method="post" action="/delete-ticket" class="mt-6">
+                <button class="px-4 py-2 bg-red-500 hover:bg-red-600 transition text-white rounded-md w-full" type="submit">
+                    Clear Ticket
+                </button>
+            </form>
+        <% } %>
     </div>
 </body>
 </html>

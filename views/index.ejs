@@ -6,21 +6,29 @@
     <title>JourneySphere Travel Co.</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-    <div class="w-full min-h-screen bg-zinc-900 text-white text-white p-10" >
-        <h1 class="text-center mb-5 text-3xl font-bold">JourneySphere Travel Co.</h1>
-        <h3 class="mb-2 text-3xl">Create Account</h3>
-        <form action="/register" method="post">
-            <input class="bg-transparent px-2 py-2 border-2 rounded-lg border-zinc-700 outline-none" type="text" placeholder="name" name="name">
-            <input class="bg-transparent px-2 py-2 border-2 rounded-lg border-zinc-700 outline-none" type="text" placeholder="username" name="username">
-            <input class="bg-transparent px-2 py-2 border-2 rounded-lg border-zinc-700 outline-none" type="email" placeholder="email" name="email">
-            <input class="bg-transparent px-2 py-2 border-2 rounded-lg border-zinc-700 outline-none" type="password" placeholder="password" name="password">
-            <input class="bg-transparent px-2 py-2 border-2 rounded-lg border-zinc-700 outline-none" type="number" placeholder="age" name="age">
-            <input class="bg-transparent px-2 py-2 border-2 rounded-lg border-zinc-700 outline-none" type="number" placeholder="phone" name="phone">
-            <input class="bg-transparent px-2 py-2 border-2 rounded-lg border-zinc-700 outline-none" type="text" placeholder="gender" name="gender">
-            <input class="bg-blue-600 px-2 py-2 rounded-md text-center" type="submit" value="Create Account">
+<body class="bg-zinc-900 text-white min-h-screen flex items-center justify-center">
+    <div class="w-full max-w-md bg-zinc-800 p-8 rounded-lg shadow-lg">
+        <!-- Title -->
+        <h1 class="text-center mb-6 text-3xl font-bold text-green-400">JourneySphere Travel Co.</h1>
+        
+        <!-- Create Account Section -->
+        <h3 class="mb-4 text-xl font-semibold text-center">Create an Account</h3>
+        <form action="/register" method="post" class="space-y-4">
+            <input class="bg-transparent w-full px-4 py-2 border-2 rounded-lg border-zinc-700 outline-none focus:border-green-500" type="text" placeholder="Name" name="name" required>
+            <input class="bg-transparent w-full px-4 py-2 border-2 rounded-lg border-zinc-700 outline-none focus:border-green-500" type="text" placeholder="Username" name="username" required>
+            <input class="bg-transparent w-full px-4 py-2 border-2 rounded-lg border-zinc-700 outline-none focus:border-green-500" type="email" placeholder="Email" name="email" required>
+            <input class="bg-transparent w-full px-4 py-2 border-2 rounded-lg border-zinc-700 outline-none focus:border-green-500" type="password" placeholder="Password" name="password" required>
+            <input class="bg-transparent w-full px-4 py-2 border-2 rounded-lg border-zinc-700 outline-none focus:border-green-500" type="number" placeholder="Age" name="age" required>
+            <input class="bg-transparent w-full px-4 py-2 border-2 rounded-lg border-zinc-700 outline-none focus:border-green-500" type="number" placeholder="Phone" name="phone" required>
+            <input class="bg-transparent w-full px-4 py-2 border-2 rounded-lg border-zinc-700 outline-none focus:border-green-500" type="text" placeholder="Gender" name="gender" required>
+            <input class="bg-blue-600 w-full px-4 py-2 rounded-md text-center text-white font-semibold hover:bg-blue-700 transition" type="submit" value="Create Account">
         </form>
-        <span><h3 class="inline-block mr-3">Alreay a user?</h3></span><a class="bg-green-500 rounded-md px-3 py-1 mb-5 inline-block" href="/login">Login</a>
+
+        <!-- Login Section -->
+        <div class="mt-6 text-center">
+            <h3 class="inline-block mr-2 text-gray-300">Already a user?</h3>
+            <a class="bg-green-500 hover:bg-green-600 transition px-4 py-2 rounded-md text-white font-semibold" href="/login">Login</a>
+        </div>
     </div>
 </body>
 </html>

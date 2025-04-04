@@ -9,55 +9,65 @@
     href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css"
     rel="stylesheet"/>
 </head>
-<body>
+<body class="bg-zinc-900 text-white min-h-screen">
     <div class="w-full min-h-screen bg-zinc-900 text-white p-10">
+        <!-- Logout Button -->
         <div class="w-full flex justify-end">
-            <a class="bg-red-500 rounded-md px-3 py-1 mb-5 inline-block" href="/logout">Logout</a>
+            <a class="bg-red-500 hover:bg-red-600 transition px-4 py-2 rounded-md text-white font-semibold" href="/logout">Logout</a>
         </div>
-        <div class="flex gap-4 mb-3 items-center">
-            <div class="h-10 w-10 rounded-md overflow-hidden">
-                <a href="profile/upload"><img class="w-full h-full object-cover" src="/images/uploads/<%= user.PROFILEPIC %>" alt=""></a>
+
+        <!-- User Greeting -->
+        <div class="flex gap-4 mb-6 items-center">
+            <div class="h-12 w-12 rounded-full overflow-hidden">
+                <a href="profile/upload">
+                    <img class="w-full h-full object-cover" src="/images/uploads/<%= user.PROFILEPIC %>" alt="Profile Picture">
+                </a>
             </div>
-            <h3 class="text-3xl"><span class="font-light">Hello</span>, <%= user.NAME %>👋</h3>
+            <h3 class="text-3xl font-semibold">Hello, <span class="text-green-400"><%= user.NAME %></span> 👋</h3>
         </div>
-        <h1 class="text-xl mb-5 mt-10">Enter the Boarding and Destination</h1>
-        <form class="flex flex-col" action="/submit" method="post">
+
+        <!-- Boarding and Destination Section -->
+        <h1 class="text-2xl font-bold mb-6">Enter the Boarding and Destination</h1>
+        <form class="flex flex-col space-y-6" action="/submit" method="post">
             <div class="flex items-center gap-10">
+                <!-- From Input -->
                 <div class="relative">
-                    <input placeholder="From" type="text" class="bg-transparent w-40 px-2 mb-2 mr-10 py-2 border-2 rounded-lg border-zinc-700 outline-none" name="fr_" id="fromInput" autocomplete="off">
-                    <ul id="fromSuggestions" class="absolute bg-white text-black w-40 mt-1 rounded-md shadow-lg hidden"></ul>
+                    <input placeholder="From" type="text" class="bg-transparent w-60 px-4 py-2 border-2 rounded-lg border-zinc-700 outline-none focus:border-green-500" name="fr_" id="fromInput" autocomplete="off">
+                    <ul id="fromSuggestions" class="absolute bg-white text-black w-60 mt-1 rounded-md shadow-lg hidden"></ul>
                 </div>
-                <i class="text-xl ri-arrow-left-right-fill"></i>
+                <i class="text-2xl ri-arrow-left-right-fill text-green-400"></i>
+                <!-- To Input -->
                 <div class="relative">
-                    <input placeholder="To" type="text" class="bg-transparent w-40 px-2 mb-2 ml-10 py-2 border-2 rounded-lg border-zinc-700 outline-none" name="to_" id="toInput" autocomplete="off">
-                    <ul id="toSuggestions" class="absolute bg-white text-black w-40 mt-1 rounded-md shadow-lg hidden"></ul>
+                    <input placeholder="To" type="text" class="bg-transparent w-60 px-4 py-2 border-2 rounded-lg border-zinc-700 outline-none focus:border-green-500" name="to_" id="toInput" autocomplete="off">
+                    <ul id="toSuggestions" class="absolute bg-white text-black w-60 mt-1 rounded-md shadow-lg hidden"></ul>
                 </div>
-
             </div>
-            <h2 class="text-lg mt-5 mb-2">Mode of Transport</h2>
-            <div class="flex flex-wrap gap-4 mb-4">
-                <label class="flex items-center">
+
+            <!-- Mode of Transport Section -->
+            <h2 class="text-xl font-semibold mt-6 mb-4">Mode of Transport</h2>
+            <div class="flex flex-wrap gap-6">
+                <label class="flex items-center cursor-pointer">
                     <input type="radio" name="mode_" value="Car" class="mr-2">
-                    Car
+                    <span class="text-lg">Car</span>
                 </label>
-                <label class="flex items-center">
+                <label class="flex items-center cursor-pointer">
                     <input type="radio" name="mode_" value="Bus" class="mr-2">
-                    Bus
+                    <span class="text-lg">Bus</span>
                 </label>
-                <label class="flex items-center">
+                <label class="flex items-center cursor-pointer">
                     <input type="radio" name="mode_" value="Train" class="mr-2">
-                    Train
+                    <span class="text-lg">Train</span>
                 </label>
-                <label class="flex items-center">
+                <label class="flex items-center cursor-pointer">
                     <input type="radio" name="mode_" value="Flight" class="mr-2">
-                    Flight
+                    <span class="text-lg">Flight</span>
                 </label>
             </div>
-            <input class='px-3 w-40 text-sm py-2 bg-blue-500 block rounded-md mb-2 mt-10' type="submit" value="Book">
-        </form>
-        
-    </div>
 
+            <!-- Submit Button -->
+            <input class="px-4 py-2 bg-blue-500 hover:bg-blue-600 transition text-white font-semibold rounded-md w-40 mt-6" type="submit" value="Book">
+        </form>
+    </div>
 
     <script>
         async function fetchSuggestions(inputId, suggestionsId) {
