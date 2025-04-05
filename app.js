@@ -322,7 +322,7 @@ app.get('/previous-tickets', isLoggedIn, async (req, res) => {
 
         // Fetch all previous tickets for the logged-in user
         const ticketsResult = await connection.execute(
-            `SELECT id, fr_, to_, mode_, ticket_date, rating, review 
+            `SELECT id, fr_, to_, mode_,duration, ticket_date, rating, review 
              FROM tickets 
              WHERE user_id = :user_id 
              ORDER BY ticket_date DESC`,
@@ -489,7 +489,7 @@ app.post('/login', async (req, res) => {
             return res.render("destination", { message: "Logged in successfully", isSuccess: true,user });
            
         } else {
-            return res.render("login", { message: "Incorrect password", isSuccess: false });
+            return res.render("login", { message: "Incorrect email or password", isSuccess: false });
         }
     } catch (err) {
         console.error(err);
@@ -724,7 +724,7 @@ app.post('/submit', isLoggedIn, async (req, res) => {
 });
 
 app.post('/rate', isLoggedIn, async (req, res) => {
-    const { fr_, to_,mode_, rating, review } = req.body; // Extract rating and review from the request body
+    const { fr_, to_,mode_,duration, rating, review } = req.body; // Extract rating and review from the request body
     let connection;
     try {
         connection = await oracledb.getConnection({
@@ -736,10 +736,10 @@ app.post('/rate', isLoggedIn, async (req, res) => {
         await connection.execute(
             `UPDATE tickets 
              SET rating = :rating, review = :review 
-             WHERE user_id = :user_id AND fr_ = :fr_ AND to_ = :to_ AND mode_= :mode_ AND ticket_date = (
+             WHERE user_id = :user_id AND fr_ = :fr_ AND to_ = :to_ AND mode_= :mode_ AND duration = :duration AND ticket_date = (
                  SELECT MAX(ticket_date) FROM tickets WHERE user_id = :user_id
              )`,
-            { user_id: req.user.userid, fr_, to_,mode_, rating, review },
+            { user_id: req.user.userid, fr_, to_,mode_,duration, rating, review },
             { autoCommit: true }
         );
         // Fetch user details
