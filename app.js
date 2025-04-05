@@ -549,8 +549,8 @@ app.post('/confirm', isLoggedIn, async (req, res) => {
 
         // Update the ticketBooked status in the database
         await connection.execute(
-            `INSERT INTO tickets (user_id, fr_, to_,mode_, duration) VALUES (:user_id, :fr_, :to_, :mode_, :duration)`,
-            { user_id: req.user.userid, fr_, to_, mode_, duration},
+            `INSERT INTO tickets (user_id, fr_, to_,mode_, duration, price) VALUES (:user_id, :fr_, :to_, :mode_, :duration, :price)`,
+            { user_id: req.user.userid, fr_, to_, mode_, duration,price},
             { autoCommit: true }
         );
         await connection.execute(

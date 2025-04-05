@@ -138,7 +138,7 @@
     
         durationInputs.forEach(input => {
             input.addEventListener('change', () => {
-                let basePrice = toCountry === 'India' ? 1000 : 11000; // Set base price based on the country
+                let basePrice = toCountry === 'IN' ? 1000 : 11000; // Set base price based on the country
                 let durationPrice = parseInt(input.getAttribute('data-price')) || 0; // Get the price for the selected duration
                 let totalPrice = basePrice + durationPrice; // Calculate the total price
                 priceElement.textContent = totalPrice.toLocaleString(); // Format the price with commas
