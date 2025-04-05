@@ -12,8 +12,8 @@
 <body class="bg-zinc-900 text-white min-h-screen">
     <div class="container mx-auto p-10">
         <!-- Logout Button -->
-        <div class="flex justify-end">
-            <a class="bg-red-500 hover:bg-red-600 transition px-4 py-2 rounded-md text-white" href="/logout">Logout</a>
+        <div class="flex justify-end mb-6">
+            <a class="bg-red-500 hover:bg-red-600 transition px-4 py-2 rounded-md text-white font-semibold" href="/logout">Logout</a>
         </div>
 
         <!-- User Greeting -->
@@ -34,41 +34,39 @@
                 <p>To: <span class="text-green-500 font-medium"><%= to_ %></span></p>
                 <p>Mode: <span class="text-green-500 font-medium"><%= mode_ %></span></p>
             </div>
-            <div class="mt-6 flex gap-4">
-                <a href="/previous-tickets" class="bg-blue-500 hover:bg-blue-600 transition px-4 py-2 rounded-md text-white">View Previous Tickets</a>
-                <form method="post" action="/confirm">
+            <div class="mt-6">
+                <form method="post" action="/confirm" class="space-y-4">
                     <input type="hidden" name="fr_" value="<%= fr_ %>">
                     <input type="hidden" name="to_" value="<%= to_ %>">
                     <input type="hidden" name="mode_" value="<%= mode_ %>">
-                    <button class="bg-green-500 hover:bg-green-600 transition px-4 py-2 rounded-md text-white">Confirm Booking</button>
+                    <h5 class="text-lg font-semibold mb-4">Select the Days and Nights to Stay</h5>
+                    <div class="flex flex-wrap gap-4">
+                        <label class="flex items-center cursor-pointer">
+                            <input type="radio" name="duration" value="1 Day 1 Night" class="mr-2">
+                            <span>1 Day 1 Night</span>
+                        </label>
+                        <label class="flex items-center cursor-pointer">
+                            <input type="radio" name="duration" value="2 Days 1 Night" class="mr-2">
+                            <span>2 Days 1 Night</span>
+                        </label>
+                        <label class="flex items-center cursor-pointer">
+                            <input type="radio" name="duration" value="3 Days 2 Nights" class="mr-2">
+                            <span>3 Days 2 Nights</span>
+                        </label>
+                        <label class="flex items-center cursor-pointer">
+                            <input type="radio" name="duration" value="4 Days 3 Nights" class="mr-2">
+                            <span>4 Days 3 Nights</span>
+                        </label>
+                        <label class="flex items-center cursor-pointer">
+                            <input type="radio" name="duration" value="5 Days 4 Nights" class="mr-2">
+                            <span>5 Days 4 Nights</span>
+                        </label>
+                    </div>
+                    <div class="flex gap-4 mt-4">
+                        <a href="/previous-tickets" class="bg-blue-500 hover:bg-blue-600 transition px-4 py-2 rounded-md text-white font-semibold">View Previous Tickets</a>
+                        <button class="bg-green-500 hover:bg-green-600 transition px-4 py-2 rounded-md text-white font-semibold">Confirm Booking</button>
+                    </div>
                 </form>
-            </div>
-        </div>
-
-        <!-- Duration Selection -->
-        <div class="bg-zinc-800 p-6 rounded-lg shadow-md mb-8">
-            <h5 class="text-lg font-semibold mb-4">Select the Days and Nights to Stay</h5>
-            <div class="flex flex-wrap gap-4">
-                <label class="flex items-center">
-                    <input type="radio" name="duration" value="1 Day 1 Night" class="mr-2">
-                    1 Day 1 Night
-                </label>
-                <label class="flex items-center">
-                    <input type="radio" name="duration" value="2 Days 1 Night" class="mr-2">
-                    2 Days 1 Night
-                </label>
-                <label class="flex items-center">
-                    <input type="radio" name="duration" value="3 Days 2 Nights" class="mr-2">
-                    3 Days 2 Nights
-                </label>
-                <label class="flex items-center">
-                    <input type="radio" name="duration" value="4 Days 3 Nights" class="mr-2">
-                    4 Days 3 Nights
-                </label>
-                <label class="flex items-center">
-                    <input type="radio" name="duration" value="5 Days 4 Nights" class="mr-2">
-                    5 Days 4 Nights
-                </label>
             </div>
         </div>
 
@@ -76,10 +74,10 @@
         <div class="bg-zinc-800 p-6 rounded-lg shadow-md mb-8">
             <h5 class="text-lg font-semibold mb-4">Enter the Details of the Passengers</h5>
             <form method="post" action="/post" class="space-y-4">
-                <input placeholder="Name" type="text" class="bg-transparent w-full px-4 py-2 border-2 rounded-lg border-zinc-700 outline-none" name="name" id="name">
-                <input placeholder="Age" type="number" class="bg-transparent w-full px-4 py-2 border-2 rounded-lg border-zinc-700 outline-none" name="age" id="age">
-                <input placeholder="Gender" type="text" class="bg-transparent w-full px-4 py-2 border-2 rounded-lg border-zinc-700 outline-none" name="gender" id="gender">
-                <input placeholder="Phone" type="number" class="bg-transparent w-full px-4 py-2 border-2 rounded-lg border-zinc-700 outline-none" name="phone" id="phone">
+                <input placeholder="Name" type="text" class="bg-transparent w-full px-4 py-2 border-2 rounded-lg border-zinc-700 outline-none focus:border-green-500" name="name" id="name">
+                <input placeholder="Age" type="number" class="bg-transparent w-full px-4 py-2 border-2 rounded-lg border-zinc-700 outline-none focus:border-green-500" name="age" id="age">
+                <input placeholder="Gender" type="text" class="bg-transparent w-full px-4 py-2 border-2 rounded-lg border-zinc-700 outline-none focus:border-green-500" name="gender" id="gender">
+                <input placeholder="Phone" type="number" class="bg-transparent w-full px-4 py-2 border-2 rounded-lg border-zinc-700 outline-none focus:border-green-500" name="phone" id="phone">
                 <input class="px-4 py-2 bg-blue-500 hover:bg-blue-600 transition text-white rounded-md w-full" type="submit" value="Add Passenger">
             </form>
         </div>

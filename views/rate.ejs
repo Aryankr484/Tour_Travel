@@ -55,7 +55,8 @@
                 <p class="mb-5">From: <span class="text-green-500"><%= fr_ %></span></p>
                 <p class="mb-5">To: <span class="text-green-500"><%= to_ %></span></p>
                 <p class="mb-5">Mode: <span class="text-green-500"><%= mode_ %></span></p>
-            
+                <p class="mb-5">Duration: <span class="text-green-500"><%= duration %></span></p>
+                
                 <div>
                     <% if (!rating && !review) { %>
                         <!-- Star Rating -->
@@ -71,6 +72,7 @@
                                 <input type="hidden" name="fr_" value="<%= fr_ %>">
                                 <input type="hidden" name="to_" value="<%= to_ %>">
                                 <input type="hidden" name="mode_" value="<%= mode_ %>">
+                                <input type="hidden" name="duration" value="<%= duration %>">
 
                             </div>
 

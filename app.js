@@ -214,6 +214,14 @@ app.get('/rate', isLoggedIn, async (req, res) => {
         const rating = user.RATING; // Assuming the column name is RATING
         const review = user.REVIEW; // Assuming the column name is REVIEW
 
+        // Fetch the most recent ticket's duration
+        const ticketResult = await connection.execute(
+            `SELECT duration FROM tickets WHERE user_id = :user_id ORDER BY id DESC FETCH FIRST 1 ROWS ONLY`,
+            { user_id: user.ID }
+        );
+        const ticket = ticketResult.rows[0] || { duration: null };
+        console.log("Duration fetched from tickets:", ticket.DURATION); // Debugging
+
         // Fetch posts associated with the user
         const postsResult = await connection.execute(
             `SELECT * FROM posts WHERE user_id = :user_id`,
@@ -221,8 +229,17 @@ app.get('/rate', isLoggedIn, async (req, res) => {
         );
         user.posts = postsResult.rows;
 
-        // Render the rate page with the user's rating and review
-        res.render("rate", { user, ticketBooked: user.TICKETBOOKED === 1, rating, review,fr_, to_, mode_ });
+        // Render the rate page with the user's rating, review, and duration
+        res.render("rate", {
+            user,
+            ticketBooked: user.TICKETBOOKED === 1,
+            rating,
+            review,
+            fr_,
+            to_,
+            mode_,
+            duration: ticket.DURATION // Pass duration to the template
+        });
     } catch (err) {
         console.error(err);
         res.status(500).send("Error loading rate page");
@@ -469,10 +486,10 @@ app.post('/login', async (req, res) => {
 
             // Pass the ticketBooked status and rating to the profile page
             // Fetch the rating from the user object
-            res.render("destination",{user});
+            return res.render("destination", { message: "Logged in successfully", isSuccess: true,user });
            
         } else {
-            res.status(401).send("Invalid credentials");
+            return res.render("login", { message: "Incorrect password", isSuccess: false });
         }
     } catch (err) {
         console.error(err);
@@ -489,7 +506,7 @@ app.post('/login', async (req, res) => {
 });
 
 app.post('/confirm', isLoggedIn, async (req, res) => {
-    let{fr_, to_, mode_} = req.body;
+    let{fr_, to_, mode_, duration} = req.body;
     let connection;
     try {
         connection = await oracledb.getConnection({
@@ -501,8 +518,8 @@ app.post('/confirm', isLoggedIn, async (req, res) => {
 
         // Update the ticketBooked status in the database
         await connection.execute(
-            `INSERT INTO tickets (user_id, fr_, to_,mode_) VALUES (:user_id, :fr_, :to_, :mode_)`,
-            { user_id: req.user.userid, fr_, to_, mode_},
+            `INSERT INTO tickets (user_id, fr_, to_,mode_, duration) VALUES (:user_id, :fr_, :to_, :mode_, :duration)`,
+            { user_id: req.user.userid, fr_, to_, mode_, duration},
             { autoCommit: true }
         );
         await connection.execute(
@@ -526,7 +543,7 @@ app.post('/confirm', isLoggedIn, async (req, res) => {
         user.posts = postsResult.rows;
 
         // Render the profile page with ticketBooked set to true
-        res.render("rate", { user, ticketBooked: true,  rating:req.body.rating, review:req.body.review, fr_, to_, mode_});
+        res.render("rate", { user, ticketBooked: true,  rating:req.body.rating, review:req.body.review, fr_, to_, mode_, duration});
         // res.redirect('/profile');
     } catch (err) {
         console.error(err);
