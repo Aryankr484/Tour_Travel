@@ -353,7 +353,7 @@ app.get('/previous-tickets', isLoggedIn, async (req, res) => {
 
         // Fetch all previous tickets for the logged-in user
         const ticketsResult = await connection.execute(
-            `SELECT id, fr_, to_, mode_,duration, ticket_date, rating, review 
+            `SELECT id, fr_, to_, mode_,duration,price, ticket_date, rating, review 
              FROM tickets 
              WHERE user_id = :user_id 
              ORDER BY ticket_date DESC`,
