@@ -13,21 +13,9 @@
 
         <!-- Display Alert Message -->
         <% if (typeof message !== 'undefined') { %>
-            <% if (isSuccess) { %>
-                <div class="bg-green-500 text-white p-3 rounded-md mb-5" id="alert-box">
-                    <%= message %>
-                </div>
-                <h3 class="mb-4 text-xl font-semibold text-center">Login to Your Account</h3>
-                <form action="/login" method="post" class="space-y-4">
-                    <input class="bg-transparent w-full px-4 py-2 border-2 rounded-lg border-zinc-700 outline-none focus:border-green-500" type="email" placeholder="Email" name="email" required>
-                    <input class="bg-transparent w-full px-4 py-2 border-2 rounded-lg border-zinc-700 outline-none focus:border-green-500" type="password" placeholder="Password" name="password" required>
-                    <input class="bg-blue-600 w-full px-4 py-2 rounded-md text-center text-white font-semibold hover:bg-blue-700 transition" type="submit" value="Login Account">
-                </form>
-            <% } else { %>
-                <div class="bg-red-500 text-white p-3 rounded-md mb-5" id="alert-box">
-                    <%= message %>
-                </div>
-            <% } %>
+            <div class="p-3 rounded-md mb-5 text-center <% if (isSuccess) { %> bg-green-500 text-white <% } else { %> bg-red-500 text-white <% } %>" id="alert-box">
+                <%= message %>
+            </div>
         <% } %>
 
         <!-- Registration Form -->

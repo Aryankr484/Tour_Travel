@@ -8,6 +8,8 @@ const oracledb = require('oracledb');
 oracledb.outFormat=oracledb.OUT_FORMAT_OBJECT;
 const db = require('./config/db'); // Require the db.js file
 const upload = require('./config/multerconfig');
+const crypto = require('crypto');
+const nodemailer = require('nodemailer');
 
 app.set('view engine', 'ejs');
 
@@ -377,6 +379,203 @@ app.get('/previous-tickets', isLoggedIn, async (req, res) => {
     }
 });
 
+
+// app.post('/send-otp', async (req, res) => {
+//     const { email } = req.body;
+//     let connection;
+//     try {
+//         connection = await oracledb.getConnection({
+//             user: 'sys',
+//             password: 'Aryan2023030#',
+//             connectString: 'localhost/orcl',
+//             privilege: oracledb.SYSDBA
+//         });
+
+//         // Check if the user exists
+//         const userResult = await connection.execute(
+//             `SELECT * FROM users WHERE email = :email`,
+//             { email }
+//         );
+
+//         if (userResult.rows.length === 0) {
+//             return res.status(404).send("User not found");
+//         }
+
+//         // Generate a 6-digit OTP
+//         const otp = crypto.randomInt(100000, 999999).toString();
+
+//         // Set OTP expiry to 5 minutes from now
+//         const otpExpiry = new Date(Date.now() + 5 * 60 * 1000);
+
+//         // Update the OTP and expiry in the database
+//         await connection.execute(
+//             `UPDATE users SET otp = :otp, otp_expiry = :otp_expiry WHERE email = :email`,
+//             { otp, otp_expiry: otpExpiry, email },
+//             { autoCommit: true }
+//         );
+
+//         // Send OTP via email
+//         const transporter = nodemailer.createTransport({
+//             service: 'gmail',
+//             auth: {
+//                 user: 'your-email@gmail.com', // Replace with your email
+//                 pass: 'your-email-password'  // Replace with your email password
+//             }
+//         });
+
+//         const mailOptions = {
+//             from: 'your-email@gmail.com',
+//             to: email,
+//             subject: 'Your OTP for Login',
+//             text: `Your OTP for login is ${otp}. It is valid for 5 minutes.`
+//         };
+
+//         await transporter.sendMail(mailOptions);
+
+//         res.status(200).send("OTP sent successfully");
+//     } catch (err) {
+//         console.error("Error in /send-otp route:", err);
+//         res.status(500).send("Error sending OTP");
+//     } finally {
+//         if (connection) {
+//             try {
+//                 await connection.close();
+//             } catch (err) {
+//                 console.error(err);
+//             }
+//         }
+//     }
+// });
+// app.post('/verify-otp', async (req, res) => {
+//     const { email, otp } = req.body;
+//     let connection;
+//     try {
+//         connection = await oracledb.getConnection({
+//             user: 'sys',
+//             password: 'Aryan2023030#',
+//             connectString: 'localhost/orcl',
+//             privilege: oracledb.SYSDBA
+//         });
+
+//         // Fetch the user and OTP details
+//         const userResult = await connection.execute(
+//             `SELECT otp, otp_expiry FROM users WHERE email = :email`,
+//             { email }
+//         );
+
+//         if (userResult.rows.length === 0) {
+//             return res.status(404).send("User not found");
+//         }
+
+//         const user = userResult.rows[0];
+//         const storedOtp = user.OTP;
+//         const otpExpiry = new Date(user.OTP_EXPIRY);
+
+//         // Check if the OTP matches and is not expired
+//         if (storedOtp !== otp) {
+//             return res.status(400).send("Invalid OTP");
+//         }
+
+//         if (otpExpiry < new Date()) {
+//             return res.status(400).send("OTP has expired");
+//         }
+
+//         // Clear the OTP after successful verification
+//         await connection.execute(
+//             `UPDATE users SET otp = NULL, otp_expiry = NULL WHERE email = :email`,
+//             { email },
+//             { autoCommit: true }
+//         );
+
+//         // Generate a JWT token for the user
+//         const token = jwt.sign({ email: email, userid: user.ID }, "shhh");
+//         res.cookie('token', token);
+
+//         res.status(200).send("OTP verified successfully");
+//     } catch (err) {
+//         console.error("Error in /verify-otp route:", err);
+//         res.status(500).send("Error verifying OTP");
+//     } finally {
+//         if (connection) {
+//             try {
+//                 await connection.close();
+//             } catch (err) {
+//                 console.error(err);
+//             }
+//         }
+//     }
+// });
+app.get('/forgot-password', (req, res) => {
+    res.render('forgot-password', );
+});
+
+app.post('/forgot-password', async (req, res) => {
+    const { email } = req.body;
+    let connection;
+    try {
+        connection = await oracledb.getConnection({
+            user: 'sys',
+            password: 'Aryan2023030#',
+            connectString: 'localhost/orcl',
+            privilege: oracledb.SYSDBA
+        });
+
+        // Check if the user exists
+        const userResult = await connection.execute(
+            `SELECT * FROM users WHERE email = :email`,
+            { email }
+        );
+
+        if (userResult.rows.length === 0) {
+            return res.render('forgot-password', { message: 'Email not found', isSuccess: false });
+        }
+
+        const user = userResult.rows[0];
+
+        // Generate a reset token
+        const resetToken = crypto.randomBytes(32).toString('hex');
+        const resetTokenExpiry = new Date(Date.now() + 15 * 60 * 1000); // Token valid for 15 minutes
+
+        // Store the reset token and expiry in the database
+        await connection.execute(
+            `UPDATE users SET reset_token = :reset_token, reset_token_expiry = :reset_token_expiry WHERE email = :email`,
+            { reset_token: resetToken, reset_token_expiry: resetTokenExpiry, email },
+            { autoCommit: true }
+        );
+
+        // Send the reset link via email
+        const transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: 'iib2023030@iiita.ac.in', // Replace with your email
+                pass: 'zlcd kftx rqml irpm'    // Replace with your app password
+            }
+        });
+
+        const resetLink = `http://localhost:3000/reset-password?token=${resetToken}`;
+        const mailOptions = {
+            from: 'iib2023030@iiita.ac.in', // Replace with your email
+            to: email,
+            subject: 'Password Reset Request',
+            text: `You requested a password reset. Click the link below to reset your password:\n\n${resetLink}\n\nThis link is valid for 15 minutes.`
+        };
+
+        await transporter.sendMail(mailOptions);
+
+        res.render('forgot-password', { message: 'Reset link sent to your email', isSuccess: true });
+    } catch (err) {
+        console.error("Error in /forgot-password route:", err);
+        res.status(500).send("Error processing forgot password request");
+    } finally {
+        if (connection) {
+            try {
+                await connection.close();
+            } catch (err) {
+                console.error(err);
+            }
+        }
+    }
+});
 app.post('/register', async (req, res) => {
     let { email, password, username, name, age, gender, phone } = req.body;
     let connection;
@@ -418,7 +617,88 @@ app.post('/register', async (req, res) => {
         }
     }
 });
+app.get('/reset-password', async (req, res) => {
+    const { token } = req.query; // Extract the reset token from the query parameters
+    let connection;
 
+    try {
+        connection = await oracledb.getConnection({
+            user: 'sys',
+            password: 'Aryan2023030#',
+            connectString: 'localhost/orcl',
+            privilege: oracledb.SYSDBA
+        });
+
+        // Check if the token exists and is valid (not expired)
+        const result = await connection.execute(
+            `SELECT email FROM users WHERE reset_token = :reset_token AND reset_token_expiry > SYSDATE`,
+            { reset_token: token }
+        );
+
+        if (result.rows.length === 0) {
+            return res.status(400).send("Invalid or expired reset token");
+        }
+
+        // Render the reset password page and pass the token to the template
+        res.render('reset-password', { token });
+    } catch (err) {
+        console.error("Error in GET /reset-password route:", err);
+        res.status(500).send("Error processing reset password request");
+    } finally {
+        if (connection) {
+            try {
+                await connection.close();
+            } catch (err) {
+                console.error("Error closing database connection:", err);
+            }
+        }
+    }
+});
+app.post('/reset-password', async (req, res) => {
+    const { token, password } = req.body;
+    let connection;
+    try {
+        connection = await oracledb.getConnection({
+            user: 'sys',
+            password: 'Aryan2023030#',
+            connectString: 'localhost/orcl',
+            privilege: oracledb.SYSDBA
+        });
+
+        // Check if the token is valid
+        const userResult = await connection.execute(
+            `SELECT * FROM users WHERE reset_token = :reset_token AND reset_token_expiry > SYSDATE`,
+            { reset_token: token }
+        );
+
+        if (userResult.rows.length === 0) {
+            return res.status(400).send("Invalid or expired token");
+        }
+
+        // Hash the new password
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        // Update the user's password and clear the reset token
+        await connection.execute(
+            `UPDATE users SET password = :password, reset_token = NULL, reset_token_expiry = NULL WHERE reset_token = :reset_token`,
+            { password: hashedPassword, reset_token: token },
+            { autoCommit: true }
+        );
+
+        res.send("Password reset successfully. You can now log in.");
+    } catch (err) {
+        console.error("Error in /reset-password route:", err);
+        res.status(500).send("Error resetting password");
+    } finally {
+        if (connection) {
+            try {
+                await connection.close();
+            } catch (err) {
+                console.error(err);
+            }
+        }
+    }
+});
 app.post('/upload', isLoggedIn, upload.single("image"), async (req, res) => {
     let connection;
     try {
