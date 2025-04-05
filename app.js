@@ -93,7 +93,8 @@ app.get('/register', isLoggedIn, (req, res) => {
     res.render("register");
 });
 app.get('/login', (req, res) => {
-    res.render("login");
+    const { message, isSuccess } = req.query; // Extract query parameters
+    res.render('login', { message, isSuccess });
 });
 app.get('/destination', isLoggedIn, async (req, res) => {
     let connection;
@@ -685,7 +686,7 @@ app.post('/reset-password', async (req, res) => {
             { autoCommit: true }
         );
 
-        res.send("Password reset successfully. You can now log in.");
+        res.redirect('/login?message=Password reset successfully&isSuccess=true');
     } catch (err) {
         console.error("Error in /reset-password route:", err);
         res.status(500).send("Error resetting password");
