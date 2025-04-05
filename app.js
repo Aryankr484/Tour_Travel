@@ -39,7 +39,7 @@ app.get('/', (req, res) => {
 // });
 app.get('/api/city', async (req, res) => {
     const cityName = req.query.name || 'San Francisco'; // Get the city name from query parameters (default: San Francisco)
-    const apiKey = 'cLifNixbrSCiFoHolpPTNaIJ93GKgGrAtCzHYYLJ'; // Hardcoded API key
+    const apiKey = 'QVBVUMjndun3T51lNkJd1A==H1YkrpkzikaUWirb'; // Hardcoded API key
 
     try {
         // Make a GET request to the external API
@@ -62,7 +62,7 @@ app.get('/api/city', async (req, res) => {
 
 app.get('/api/city-suggestions', async (req, res) => {
     const query = req.query.name || ''; // Get the query from the request
-    const apiKey = 'cLifNixbrSCiFoHolpPTNaIJ93GKgGrAtCzHYYLJ'; // API key
+    const apiKey = 'QVBVUMjndun3T51lNkJd1A==H1YkrpkzikaUWirb'; // API key
 
     try {
         // Fetch city suggestions from the external API
@@ -164,18 +164,47 @@ app.get('/profile', isLoggedIn, async (req, res) => {
             `SELECT * FROM posts WHERE user_id = :user_id`,
             { user_id: user.ID }
         );
+
+        // Fetch the most recent location details
         const locationResult = await connection.execute(
-            `SELECT fr_, to_,mode_ FROM locations WHERE user_id = :user_id ORDER BY id DESC FETCH FIRST 1 ROWS ONLY`,
+            `SELECT fr_, to_, mode_ FROM locations WHERE user_id = :user_id ORDER BY id DESC FETCH FIRST 1 ROWS ONLY`,
             { user_id: user.ID }
         );
         const location = locationResult.rows[0] || { fr_: null, to_: null, mode_: null };
-        user.posts = postsResult.rows||[]; // Ensure posts is always an array
+
+        // Fetch country information using the city API
+        let country = 'India'; // Default to India
+        if (location.TO_) {
+            try {
+                const response = await axios.get(`http://localhost:3000/api/city`, {
+                    params: { name: location.TO_ } // Pass the destination city name
+                });
+
+                if (response.data.success && response.data.data.length > 0) {
+                    country = response.data.data[0].country || 'India'; // Extract the country field
+                }
+            } catch (err) {
+                console.error('Error fetching country information:', err.message);
+            }
+        }
+
+        user.posts = postsResult.rows || []; // Ensure posts is always an array
 
         const ticketBooked = user.TICKETBOOKED === 1;
         const rating = user.RATING;
         const review = user.REVIEW;
 
-        res.render("profile", { user, ticketBooked,rating,review, fr_: location.FR_, to_: location.TO_, mode_: location.MODE_});
+        // Pass the country to the profile page
+        res.render("profile", {
+            user,
+            ticketBooked,
+            rating,
+            review,
+            fr_: location.FR_,
+            to_: location.TO_,
+            mode_: location.MODE_,
+            country // Pass the country to the template
+        });
     } catch (err) {
         console.error("Error in /profile route:", err);
         res.status(500).send("Error fetching profile");
@@ -190,7 +219,7 @@ app.get('/profile', isLoggedIn, async (req, res) => {
     }
 });
 app.get('/rate', isLoggedIn, async (req, res) => {
-    let { fr_, to_, mode_ } = req.body;
+    let { fr_, to_, mode_,price } = req.query;
     let connection;
     try {
         connection = await oracledb.getConnection({
@@ -238,7 +267,9 @@ app.get('/rate', isLoggedIn, async (req, res) => {
             fr_,
             to_,
             mode_,
-            duration: ticket.DURATION // Pass duration to the template
+            duration: ticket.DURATION,
+            price // Pass duration to the template
+
         });
     } catch (err) {
         console.error(err);
@@ -506,7 +537,7 @@ app.post('/login', async (req, res) => {
 });
 
 app.post('/confirm', isLoggedIn, async (req, res) => {
-    let{fr_, to_, mode_, duration} = req.body;
+    let{fr_, to_, mode_, duration,price} = req.body;
     let connection;
     try {
         connection = await oracledb.getConnection({
@@ -543,7 +574,7 @@ app.post('/confirm', isLoggedIn, async (req, res) => {
         user.posts = postsResult.rows;
 
         // Render the profile page with ticketBooked set to true
-        res.render("rate", { user, ticketBooked: true,  rating:req.body.rating, review:req.body.review, fr_, to_, mode_, duration});
+        res.render("rate", { user, ticketBooked: true,  rating:req.body.rating, review:req.body.review, fr_, to_, mode_, duration, price});
         // res.redirect('/profile');
     } catch (err) {
         console.error(err);
@@ -679,11 +710,27 @@ app.post('/submit', isLoggedIn, async (req, res) => {
         });
 
         // Insert into the locations table
-        const result = await connection.execute(
+        await connection.execute(
             `INSERT INTO locations (user_id, fr_, to_, mode_) VALUES (:user_id, :fr_, :to_, :mode_)`,
-            { user_id: req.user.userid, fr_, to_,mode_ },
+            { user_id: req.user.userid, fr_, to_, mode_ },
             { autoCommit: true }
         );
+
+        // Fetch country information using the city API
+        let country = 'India'; // Default to India
+        if (to_) {
+            try {
+                const response = await axios.get(`http://localhost:3000/api/city`, {
+                    params: { name: to_ } // Pass the destination city name
+                });
+
+                if (response.data.success && response.data.data.length > 0) {
+                    country = response.data.data[0].country || 'India'; // Extract the country field
+                }
+            } catch (err) {
+                console.error('Error fetching country information:', err.message);
+            }
+        }
 
         // Fetch user details
         const userResult = await connection.execute(
@@ -707,8 +754,9 @@ app.post('/submit', isLoggedIn, async (req, res) => {
         const ticketBooked = user.TICKETBOOKED === 1;
         const rating = user.RATING;
         const review = user.REVIEW;
-        
-        res.render("profile", { user, ticketBooked, rating, review, fr_, to_, mode_});
+
+        // Render the profile page with the country information
+        res.render("profile", { user, ticketBooked, rating, review, fr_, to_, mode_, country });
     } catch (err) {
         console.error("Error in /submit route:", err);
         res.status(500).send("Error creating post");
@@ -724,7 +772,7 @@ app.post('/submit', isLoggedIn, async (req, res) => {
 });
 
 app.post('/rate', isLoggedIn, async (req, res) => {
-    const { fr_, to_,mode_,duration, rating, review } = req.body; // Extract rating and review from the request body
+    const { fr_, to_, mode_, duration, price, rating, review } = req.body; // Extract price, rating, and review from the request body
     let connection;
     try {
         connection = await oracledb.getConnection({
@@ -733,36 +781,19 @@ app.post('/rate', isLoggedIn, async (req, res) => {
             connectString: 'localhost/orcl',
             privilege: oracledb.SYSDBA
         });
+
+        // Update the ticket with the rating, review, and price
         await connection.execute(
             `UPDATE tickets 
-             SET rating = :rating, review = :review 
-             WHERE user_id = :user_id AND fr_ = :fr_ AND to_ = :to_ AND mode_= :mode_ AND duration = :duration AND ticket_date = (
+             SET rating = :rating, review = :review, price = :price
+             WHERE user_id = :user_id AND fr_ = :fr_ AND to_ = :to_ AND mode_ = :mode_ AND duration = :duration AND ticket_date = (
                  SELECT MAX(ticket_date) FROM tickets WHERE user_id = :user_id
              )`,
-            { user_id: req.user.userid, fr_, to_,mode_,duration, rating, review },
+            { user_id: req.user.userid, fr_, to_, mode_, duration, price, rating, review },
             { autoCommit: true }
         );
+
         // Fetch user details
-        const result1 = await connection.execute(
-            `INSERT INTO guidePosts (user_id, email, rating, review) VALUES (:user_id,:email, :rating, :review)`,
-            { user_id: req.user.userid, email:req.user.email, rating: req.body.rating, review: req.body.review},
-            { autoCommit: true }
-        );
-        const result2 = await connection.execute(
-            `UPDATE users SET rating = :rating WHERE email = :email`,
-            { rating: req.body.rating, email: req.user.email },
-            { autoCommit: true }
-        );
-        const result3 = await connection.execute(
-            `INSERT INTO guidePosts (user_id, email, rating, review) VALUES (:user_id,:email, :rating, :review)`,
-            { user_id: req.user.userid, email:req.user.email, rating: req.body.rating, review: req.body.review},
-            { autoCommit: true }
-        );
-        const result4 = await connection.execute(
-            `UPDATE users SET review = :review WHERE email = :email`,
-            { review: req.body.review, email: req.user.email },
-            { autoCommit: true }
-        );
         const result = await connection.execute(
             `SELECT * FROM users WHERE email = :email`,
             { email: req.user.email }
@@ -776,11 +807,11 @@ app.post('/rate', isLoggedIn, async (req, res) => {
         );
         user.posts = postsResult.rows;
 
-        // Set ticketBooked to true and re-render the profile page
-        res.redirect('/previous-tickets'); // Redirect to the previous tickets page
+        // Redirect to the previous tickets page
+        res.redirect('/previous-tickets');
     } catch (err) {
         console.error(err);
-        res.status(500).send("Error booking ticket");
+        res.status(500).send("Error updating ticket");
     } finally {
         if (connection) {
             try {

@@ -33,34 +33,40 @@
                 <p>From: <span class="text-green-500 font-medium"><%= fr_ %></span></p>
                 <p>To: <span class="text-green-500 font-medium"><%= to_ %></span></p>
                 <p>Mode: <span class="text-green-500 font-medium"><%= mode_ %></span></p>
+                <p>Country: <span class="text-green-500 font-medium"><%= country %></span></p>
             </div>
             <div class="mt-6">
                 <form method="post" action="/confirm" class="space-y-4">
                     <input type="hidden" name="fr_" value="<%= fr_ %>">
                     <input type="hidden" name="to_" value="<%= to_ %>">
                     <input type="hidden" name="mode_" value="<%= mode_ %>">
+                    <input type="hidden" name="price" id="hidden-price"> <!-- Hidden input for price -->
+
                     <h5 class="text-lg font-semibold mb-4">Select the Days and Nights to Stay</h5>
                     <div class="flex flex-wrap gap-4">
                         <label class="flex items-center cursor-pointer">
-                            <input type="radio" name="duration" value="1 Day 1 Night" class="mr-2">
+                            <input type="radio" name="duration" value="1 Day 1 Night" class="mr-2" data-price="5000">
                             <span>1 Day 1 Night</span>
                         </label>
                         <label class="flex items-center cursor-pointer">
-                            <input type="radio" name="duration" value="2 Days 1 Night" class="mr-2">
+                            <input type="radio" name="duration" value="2 Days 1 Night" class="mr-2" data-price="10000">
                             <span>2 Days 1 Night</span>
                         </label>
                         <label class="flex items-center cursor-pointer">
-                            <input type="radio" name="duration" value="3 Days 2 Nights" class="mr-2">
+                            <input type="radio" name="duration" value="3 Days 2 Nights" class="mr-2" data-price="15000">
                             <span>3 Days 2 Nights</span>
                         </label>
                         <label class="flex items-center cursor-pointer">
-                            <input type="radio" name="duration" value="4 Days 3 Nights" class="mr-2">
+                            <input type="radio" name="duration" value="4 Days 3 Nights" class="mr-2" data-price="20000">
                             <span>4 Days 3 Nights</span>
                         </label>
                         <label class="flex items-center cursor-pointer">
-                            <input type="radio" name="duration" value="5 Days 4 Nights" class="mr-2">
+                            <input type="radio" name="duration" value="5 Days 4 Nights" class="mr-2" data-price="25000">
                             <span>5 Days 4 Nights</span>
                         </label>
+                    </div>
+                    <div class="mt-4">
+                        <p class="text-lg font-semibold">Price: <span id="price" class="text-green-500">0</span> INR</p>
                     </div>
                     <div class="flex gap-4 mt-4">
                         <a href="/previous-tickets" class="bg-blue-500 hover:bg-blue-600 transition px-4 py-2 rounded-md text-white font-semibold">View Previous Tickets</a>
@@ -69,6 +75,9 @@
                 </form>
             </div>
         </div>
+        
+        
+        
 
         <!-- Passenger Details Form -->
         <div class="bg-zinc-800 p-6 rounded-lg shadow-md mb-8">
@@ -121,5 +130,21 @@
             </form>
         <% } %>
     </div>
+    <script>
+        const durationInputs = document.querySelectorAll('input[name="duration"]');
+        const priceElement = document.getElementById('price');
+        const hiddenPriceInput = document.getElementById('hidden-price'); // Hidden input for price
+        const toCountry = "<%= country %>"; // Destination country passed from the backend
+    
+        durationInputs.forEach(input => {
+            input.addEventListener('change', () => {
+                let basePrice = toCountry === 'India' ? 1000 : 11000; // Set base price based on the country
+                let durationPrice = parseInt(input.getAttribute('data-price')) || 0; // Get the price for the selected duration
+                let totalPrice = basePrice + durationPrice; // Calculate the total price
+                priceElement.textContent = totalPrice.toLocaleString(); // Format the price with commas
+                hiddenPriceInput.value = totalPrice; // Update the hidden input value
+            });
+        });
+    </script>
 </body>
 </html>
