@@ -10,6 +10,7 @@ const db = require('./config/db'); // Require the db.js file
 const upload = require('./config/multerconfig');
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
+const { generateInvoice } = require('./utils/invoice');
 
 app.set('view engine', 'ejs');
 
@@ -778,7 +779,7 @@ app.post('/login', async (req, res) => {
         );
 
         if (result.rows.length === 0) {
-            return res.status(500).send("User not found");
+            return res.render("login", { message: "Incorrect email or password", isSuccess: false });
         }
 
         const user = result.rows[0];
@@ -827,7 +828,7 @@ app.post('/confirm', isLoggedIn, async (req, res) => {
             connectString: 'localhost/orcl',
             privilege: oracledb.SYSDBA
         });
-
+        
         // Update the ticketBooked status in the database
         await connection.execute(
             `INSERT INTO tickets (user_id, fr_, to_,mode_, duration, price) VALUES (:user_id, :fr_, :to_, :mode_, :duration, :price)`,
@@ -998,7 +999,7 @@ app.post('/submit', isLoggedIn, async (req, res) => {
         );
 
         // Fetch country information using the city API
-        let country = 'India'; // Default to India
+        let country = 'IN'; // Default to India
         if (to_) {
             try {
                 const response = await axios.get(`http://localhost:3000/api/city`, {
@@ -1052,6 +1053,13 @@ app.post('/submit', isLoggedIn, async (req, res) => {
     }
 });
 
+const fs = require('fs'); // Ensure fs is imported at the top of your file
+
+
+
+
+
+
 app.post('/rate', isLoggedIn, async (req, res) => {
     const { fr_, to_, mode_, duration, price, rating, review } = req.body; // Extract price, rating, and review from the request body
     let connection;
@@ -1081,17 +1089,37 @@ app.post('/rate', isLoggedIn, async (req, res) => {
         );
         const user = result.rows[0];
 
-        // Fetch posts associated with the user
-        const postsResult = await connection.execute(
-            `SELECT * FROM posts WHERE user_id = :user_id`,
-            { user_id: user.ID }
-        );
-        user.posts = postsResult.rows;
+        // Generate the invoice
+        const invoicePath = await generateInvoice({
+            ticket_id: `TICKET_${Date.now()}`,
+            fr_, to_, mode_, duration, price, rating, review
+        });
 
-        // Redirect to the previous tickets page
-        res.redirect('/previous-tickets');
+        console.log("Generated invoice path:", invoicePath);
+
+        // Check if the file exists
+        if (!fs.existsSync(invoicePath)) {
+            console.error("File does not exist:", invoicePath);
+            return res.status(404).send("Invoice file not found");
+        }
+
+        // Send the invoice as a downloadable file
+        
+        res.download(path.resolve(invoicePath), `invoice_${Date.now()}.pdf`, (err) => {
+            if (err) {
+                console.error("Error sending invoice:", err);
+                res.status(500).send("Error downloading invoice");
+            } else {
+                console.log("Invoice sent successfully");
+                try {
+                    fs.unlinkSync(invoicePath); // Clean up the file after sending
+                } catch (unlinkErr) {
+                    console.error("Error deleting invoice file:", unlinkErr);
+                }
+            }
+        });
     } catch (err) {
-        console.error(err);
+        console.error("Error in /rate route:", err);
         res.status(500).send("Error updating ticket");
     } finally {
         if (connection) {
@@ -1103,39 +1131,6 @@ app.post('/rate', isLoggedIn, async (req, res) => {
         }
     }
 });
-app.post('/delete-previous-ticket', isLoggedIn, async (req, res) => {
-    const { ticket_id } = req.body; // Extract the ticket ID from the request body
-    let connection;
-    try {
-        connection = await oracledb.getConnection({
-            user: 'sys',
-            password: 'Aryan2023030#',
-            connectString: 'localhost/orcl',
-            privilege: oracledb.SYSDBA
-        });
-
-        // Delete the ticket with the specified ID
-        await connection.execute(
-            `DELETE FROM tickets WHERE id = :ticket_id`,
-            { ticket_id },
-            { autoCommit: true }
-        );
-
-        res.redirect('/previous-tickets'); // Redirect back to the previous tickets page
-    } catch (err) {
-        console.error("Error in /delete-previous-ticket route:", err);
-        res.status(500).send("Error deleting ticket");
-    } finally {
-        if (connection) {
-            try {
-                await connection.close();
-            } catch (err) {
-                console.error(err);
-            }
-        }
-    }
-});
-
 
 // app.post('/review', isLoggedIn, async (req, res) => {
 //     let connection;

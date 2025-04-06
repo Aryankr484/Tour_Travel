@@ -122,13 +122,13 @@
         </div>
 
         <!-- Clear Ticket Button -->
-        <% if (ticketBooked) { %>
+        <!-- <% if (ticketBooked) { %> -->
             <form method="post" action="/delete-ticket" class="mt-6">
                 <button class="px-4 py-2 bg-red-500 hover:bg-red-600 transition text-white rounded-md w-full" type="submit">
                     Clear Ticket
                 </button>
             </form>
-        <% } %>
+        <!-- <% } %> -->
     </div>
     <script>
         const durationInputs = document.querySelectorAll('input[name="duration"]');
