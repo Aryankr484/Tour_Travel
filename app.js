@@ -779,7 +779,7 @@ app.post('/login', async (req, res) => {
         );
 
         if (result.rows.length === 0) {
-            return res.render("login", { message: "Incorrect email or password", isSuccess: false });
+            return res.render("login", { message: "User not found", isSuccess: false });
         }
 
         const user = result.rows[0];
@@ -790,6 +790,13 @@ app.post('/login', async (req, res) => {
             const token = jwt.sign({ email: email, userid: user.ID }, "shhh");
             res.cookie('token', token);
 
+            // Update the last_login and logged_in status in the database
+            await connection.execute(
+                `UPDATE users SET last_login = SYSTIMESTAMP, logged_in = 1 WHERE email = :email`,
+                { email },
+                { autoCommit: true }
+            );
+
             // Fetch posts associated with the user
             const postsResult = await connection.execute(
                 `SELECT * FROM posts WHERE user_id = :user_id`,
@@ -797,10 +804,7 @@ app.post('/login', async (req, res) => {
             );
             user.posts = postsResult.rows;
 
-            // Pass the ticketBooked status and rating to the profile page
-            // Fetch the rating from the user object
-            return res.render("destination", { message: "Logged in successfully", isSuccess: true,user });
-           
+            return res.render("destination", { message: "Logged in successfully", isSuccess: true, user });
         } else {
             return res.render("login", { message: "Incorrect email or password", isSuccess: false });
         }
@@ -1237,17 +1241,76 @@ app.post('/rate', isLoggedIn, async (req, res) => {
 // });
 
 
-app.get('/logout', (req, res) => {
-    res.cookie("token", "");
-    res.redirect("/");
-});
+app.get('/logout', isLoggedIn, async (req, res) => {
+    let connection;
+    try {
+        connection = await oracledb.getConnection({
+            user: 'sys',
+            password: 'Aryan2023030#',
+            connectString: 'localhost/orcl',
+            privilege: oracledb.SYSDBA
+        });
 
+        // Update the logged_in status in the database
+        await connection.execute(
+            `UPDATE users SET logged_in = 0 WHERE email = :email`,
+            { email: req.user.email },
+            { autoCommit: true }
+        );
+
+        // Clear the token cookie
+        res.cookie("token", "");
+        res.redirect("/");
+    } catch (err) {
+        console.error("Error in /logout route:", err);
+        res.status(500).send("Error logging out");
+    } finally {
+        if (connection) {
+            try {
+                await connection.close();
+            } catch (err) {
+                console.error(err);
+            }
+        }
+    }
+});
 app.listen(3000, async () => {
     await db.initialize();
     console.log("Server is running on port 3000");
 });
 
+
 process.on('SIGINT', async () => {
     await db.close();
     process.exit(0);
+});
+app.get('/logged-in-users', isLoggedIn, async (req, res) => {
+    let connection;
+    try {
+        connection = await oracledb.getConnection({
+            user: 'sys',
+            password: 'Aryan2023030#',
+            connectString: 'localhost/orcl',
+            privilege: oracledb.SYSDBA
+        });
+
+        // Fetch all logged-in users
+        const result = await connection.execute(
+            `SELECT username, email, last_login FROM users WHERE logged_in = 1`
+        );
+
+        const loggedInUsers = result.rows;
+        res.render("logged-in-users", { loggedInUsers });
+    } catch (err) {
+        console.error("Error fetching logged-in users:", err);
+        res.status(500).send("Error fetching logged-in users");
+    } finally {
+        if (connection) {
+            try {
+                await connection.close();
+            } catch (err) {
+                console.error(err);
+            }
+        }
+    }
 });
