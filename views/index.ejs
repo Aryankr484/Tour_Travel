@@ -3,32 +3,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JourneySphere Travel Co.</title>
+    <title>Register - JourneySphere Travel Co.</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-zinc-900 text-white min-h-screen flex items-center justify-center">
-    <div class="w-full max-w-md bg-zinc-800 p-8 rounded-lg shadow-lg">
-        <!-- Title -->
-        <h1 class="text-center mb-6 text-3xl font-bold text-green-400">JourneySphere Travel Co.</h1>
-        
-        <!-- Create Account Section -->
-        <h3 class="mb-4 text-xl font-semibold text-center">Create an Account</h3>
+<body class="bg-[#00aaff] flex items-center justify-center min-h-screen font-sans">
+    <div class="bg-white w-[900px] h-[650px] rounded-2xl shadow-2xl flex overflow-hidden">
+      
+      <!-- Left Side -->
+      <div class="w-1/2 bg-cover bg-center relative" style="background-image: url('https://images.unsplash.com/photo-1739911013984-8b3bf696a182?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D');">
+        <div class="absolute inset-0 bg-black bg-opacity-20 rounded-l-2xl"></div>
+        <div class="absolute top-8 left-8 text-white z-10">
+          <h1 class="text-3xl font-[cursive]">JourneySphere Travel Co.</h1>
+          <p class="mt-2 leading-none text-sm w-64">
+            Embark on a journey of a lifetime with us. Your adventure starts here!
+          </p>
+        </div>
+      </div>
+
+      <!-- Right Side -->
+      <div class="w-1/2 p-10 flex flex-col justify-center relative">
+        <h2 class="text-3xl font-bold text-blue-600 mb-6">Create an Account</h2>
+        <p class="text-gray-500 mb-6">Join us and start your journey today!</p>
+
         <form action="/register" method="post" class="space-y-4">
-            <input class="bg-transparent w-full px-4 py-2 border-2 rounded-lg border-zinc-700 outline-none focus:border-green-500" type="text" placeholder="Name" name="name" required>
-            <input class="bg-transparent w-full px-4 py-2 border-2 rounded-lg border-zinc-700 outline-none focus:border-green-500" type="text" placeholder="Username" name="username" required>
-            <input class="bg-transparent w-full px-4 py-2 border-2 rounded-lg border-zinc-700 outline-none focus:border-green-500" type="email" placeholder="Email" name="email" required>
-            <input class="bg-transparent w-full px-4 py-2 border-2 rounded-lg border-zinc-700 outline-none focus:border-green-500" type="password" placeholder="Password" name="password" required>
-            <input class="bg-transparent w-full px-4 py-2 border-2 rounded-lg border-zinc-700 outline-none focus:border-green-500" type="number" placeholder="Age" name="age" required>
-            <input class="bg-transparent w-full px-4 py-2 border-2 rounded-lg border-zinc-700 outline-none focus:border-green-500" type="number" placeholder="Phone" name="phone" required>
-            <input class="bg-transparent w-full px-4 py-2 border-2 rounded-lg border-zinc-700 outline-none focus:border-green-500" type="text" placeholder="Gender" name="gender" required>
-            <input class="bg-blue-600 w-full px-4 py-2 rounded-md text-center text-white font-semibold hover:bg-blue-700 transition" type="submit" value="Create Account">
+            <div>
+                <input class="w-full px-4 py-2 border border-blue-400 rounded outline-none focus:ring-2 focus:ring-blue-500" type="text" placeholder="Name" name="name" required>
+            </div>
+            <div>
+                <input class="w-full px-4 py-2 border border-blue-400 rounded outline-none focus:ring-2 focus:ring-blue-500" type="text" placeholder="Username" name="username" required>
+            </div>
+            <div>
+                <input class="w-full px-4 py-2 border border-blue-400 rounded outline-none focus:ring-2 focus:ring-blue-500" type="email" placeholder="Email" name="email" required>
+            </div>
+            <div>
+                <input class="w-full px-4 py-2 border border-blue-400 rounded outline-none focus:ring-2 focus:ring-blue-500" type="password" placeholder="Password" name="password" required>
+            </div>
+            <div>
+                <input class="w-full px-4 py-2 border border-blue-400 rounded outline-none focus:ring-2 focus:ring-blue-500" type="number" placeholder="Age" name="age" required>
+            </div>
+            <div>
+                <input class="w-full px-4 py-2 border border-blue-400 rounded outline-none focus:ring-2 focus:ring-blue-500" type="number" placeholder="Phone" name="phone" required>
+            </div>
+            <div>
+                
+                <input class="w-full px-4 py-2 border border-blue-400 rounded outline-none focus:ring-2 focus:ring-blue-500" type="text" placeholder="Gender" name="gender" required>
+            </div>
+            <button class="bg-blue-500 hover:bg-blue-600 text-white font-semibold w-full py-2 rounded mt-2">Create Account</button>
         </form>
 
-        <!-- Login Section -->
-        <div class="mt-6 text-center">
-            <h3 class="inline-block mr-2 text-gray-300">Already a user?</h3>
-            <a class="bg-green-500 hover:bg-green-600 transition px-4 py-2 rounded-md text-white font-semibold" href="/login">Login</a>
+        <div class="flex items-center my-4">
+          <hr class="flex-grow border-gray-300">
+          <span class="mx-2 text-gray-400 text-sm">OR</span>
+          <hr class="flex-grow border-gray-300">
         </div>
+
+        <p class="text-sm text-gray-500 text-center">
+          Already have an account? <a href="/login" class="text-blue-500 hover:underline">Login</a>
+        </p>
+      </div>
     </div>
-</body>
+  </body>
 </html>

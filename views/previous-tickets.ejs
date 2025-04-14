@@ -37,16 +37,21 @@
                             <td class="border border-gray-300 px-4 py-2"><%= ticket.RATING ? ticket.RATING + '/5' : 'N/A' %></td>
                             <td class="border border-gray-300 px-4 py-2"><%= ticket.REVIEW || 'No review' %></td>
                             <td class="border border-gray-300 px-4 py-2">
-                                <form method="post" action="/delete-previous-ticket">
-                                    <input type="hidden" name="ticket_id" value="<%= ticket.ID %>">
-                                    <button class="bg-red-500 px-3 py-1 rounded-md text-white">Cancel</button>
-                                </form>
+                                <% if (ticket.IS_CANCELLED) { %>
+                                    <button class="bg-gray-700 px-3 py-1 rounded-md text-white cursor-not-allowed" disabled>Cancelled</button>
+                                <% } else { %>
+                                    
+                                    <form method="post" action="/delete-previous-ticket">
+                                        <input type="hidden" name="ticket_id" value="<%= ticket.ID %>">
+                                        <button class="bg-red-500 px-3 py-1 rounded-md text-white" data-ticket-id="<%= ticket.ID %>">Cancel</button>
+                                    </form>
+                                <% } %>
                             </td>
                         </tr>
                     <% }); %>
                 <% } else { %>
                     <tr>
-                        <td colspan="6" class="text-center border border-gray-300 px-4 py-2">No previous tickets found</td>
+                        <td colspan="9" class="text-center border border-gray-300 px-4 py-2">No previous tickets found</td>
                     </tr>
                 <% } %>
             </tbody>
@@ -54,5 +59,37 @@
 
         <a href="/profile" class="bg-blue-500 px-4 py-2 rounded-md text-white mt-5 inline-block">Back to Profile</a>
     </div>
+    <script>
+ document.querySelectorAll('button[data-ticket-id]').forEach(button => {
+    button.addEventListener('click', function (event) {
+        event.preventDefault(); // Prevent default behavior
+
+        const ticketId = this.getAttribute('data-ticket-id'); // Get the ticket ID from the button
+        const form = this.closest('form'); // Find the closest form element
+
+        // Send an AJAX request to cancel the ticket
+        fetch(form.action, {
+            method: form.method,
+            body: new FormData(form)
+        })
+            .then(response => {
+                if (response.ok) {
+                    // Update the button to show "Cancelled"
+                    this.textContent = "Cancelled";
+                    this.classList.remove('bg-red-500');
+                    this.classList.add('bg-gray-700', 'cursor-not-allowed');
+                    this.disabled = true;
+                } else {
+                    alert('Failed to cancel the ticket. Please try again.');
+                }
+            })
+            .catch(err => {
+                console.error('Error:', err);
+                alert('An error occurred while cancelling the ticket.');
+            });
+    });
+});
+    </script>
 </body>
+
 </html>

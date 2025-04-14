@@ -9,70 +9,92 @@
     href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css"
     rel="stylesheet"/>
 </head>
-<body class="bg-zinc-900 text-white min-h-screen">
-    <div class="w-full min-h-screen bg-zinc-900 text-white p-10">
-        <!-- Logout Button -->
-        <% if (typeof message !== 'undefined') { %>
-            <div id="popup" class="p-4 mb-4 rounded-md text-center <% if (isSuccess) { %> bg-green-500 text-white <% } else { %> bg-red-500 text-white <% } %>">
-                <%= message %>
-            </div>
-        <% } %>
-        <div class="w-full flex justify-end">
-            <a class="bg-red-500 hover:bg-red-600 transition px-4 py-2 rounded-md text-white font-semibold" href="/logout">Logout</a>
-        </div>
+<body class="bg-gray-100 text-gray-800 min-h-screen flex flex-col">
 
+    <!-- Navbar -->
+    <header class="bg-white shadow-md">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <a href="/" class="text-2xl font-bold text-blue-500">JourneySphere</a>
+            <nav class="space-x-4">
+                <a href="/" class="text-gray-600 hover:text-gray-800 transition">Home</a>
+                <a href="/logout" class="text-red-500 hover:text-red-600 transition">Logout</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow container mx-auto px-4 py-10">
         <!-- User Greeting -->
-        <div class="flex gap-4 mb-6 items-center">
-            <div class="h-12 w-12 rounded-full overflow-hidden">
+        <div class="flex items-center gap-4 mb-8">
+            <div class="h-16 w-16 rounded-full overflow-hidden border-2 border-blue-500">
                 <a href="profile/upload">
                     <img class="w-full h-full object-cover" src="/images/uploads/<%= user.PROFILEPIC %>" alt="Profile Picture">
                 </a>
             </div>
-            <h3 class="text-3xl font-semibold">Hello, <span class="text-green-400"><%= user.NAME %></span> 👋</h3>
+            <h3 class="text-3xl font-semibold">Hello, <span class="text-blue-500"><%= user.NAME %></span></h3>
         </div>
 
         <!-- Boarding and Destination Section -->
-        <h1 class="text-2xl font-bold mb-6">Enter the Boarding and Destination</h1>
-        <form class="flex flex-col space-y-6" action="/submit" method="post">
-            <div class="flex items-center gap-10">
-                <!-- From Input -->
-                <div class="relative">
-                    <input placeholder="From" type="text" class="bg-transparent w-60 px-4 py-2 border-2 rounded-lg border-zinc-700 outline-none focus:border-green-500" name="fr_" id="fromInput" autocomplete="off">
-                    <ul id="fromSuggestions" class="absolute bg-white text-black w-60 mt-1 rounded-md shadow-lg hidden"></ul>
+        <div class="bg-white p-6 rounded-lg shadow-lg">
+            <h1 class="text-2xl font-bold mb-6 text-gray-700">Enter the Boarding and Destination</h1>
+            <form class="space-y-6" action="/submit" method="post">
+                <div class="flex items-center gap-10">
+                    <!-- From Input -->
+                    <div class="relative">
+                        <input placeholder="From" type="text" class="bg-gray-50 w-60 px-4 py-2 border-2 rounded-lg border-gray-300 outline-none focus:border-blue-500" name="fr_" id="fromInput" autocomplete="off">
+                        <ul id="fromSuggestions" class="absolute bg-white text-gray-800 w-60 mt-1 rounded-md shadow-lg hidden"></ul>
+                    </div>
+                    <i class="text-2xl ri-arrow-left-right-fill text-blue-500"></i>
+                    <!-- To Input -->
+                    <div class="relative">
+                        <input placeholder="To" type="text" class="bg-gray-50 w-60 px-4 py-2 border-2 rounded-lg border-gray-300 outline-none focus:border-blue-500" name="to_" id="toInput" autocomplete="off">
+                        <ul id="toSuggestions" class="absolute bg-white text-gray-800 w-60 mt-1 rounded-md shadow-lg hidden"></ul>
+                    </div>
                 </div>
-                <i class="text-2xl ri-arrow-left-right-fill text-green-400"></i>
-                <!-- To Input -->
-                <div class="relative">
-                    <input placeholder="To" type="text" class="bg-transparent w-60 px-4 py-2 border-2 rounded-lg border-zinc-700 outline-none focus:border-green-500" name="to_" id="toInput" autocomplete="off">
-                    <ul id="toSuggestions" class="absolute bg-white text-black w-60 mt-1 rounded-md shadow-lg hidden"></ul>
-                </div>
-            </div>
 
-            <!-- Mode of Transport Section -->
-            <h2 class="text-xl font-semibold mt-6 mb-4">Mode of Transport</h2>
-            <div class="flex flex-wrap gap-6">
-                <label class="flex items-center cursor-pointer">
-                    <input type="radio" name="mode_" value="Car" class="mr-2">
-                    <span class="text-lg">Car</span>
-                </label>
-                <label class="flex items-center cursor-pointer">
-                    <input type="radio" name="mode_" value="Bus" class="mr-2">
-                    <span class="text-lg">Bus</span>
-                </label>
-                <label class="flex items-center cursor-pointer">
-                    <input type="radio" name="mode_" value="Train" class="mr-2">
-                    <span class="text-lg">Train</span>
-                </label>
-                <label class="flex items-center cursor-pointer">
-                    <input type="radio" name="mode_" value="Flight" class="mr-2">
-                    <span class="text-lg">Flight</span>
-                </label>
-            </div>
+                <!-- Mode of Transport Section -->
+                <h2 class="text-xl font-semibold mt-6 mb-4 text-gray-700">Mode of Transport</h2>
+<div class="grid grid-cols-2 gap-6 md:grid-cols-4">
+    <!-- Car -->
+    <label class="flex flex-col items-center justify-center p-4 bg-gray-50 border-2 border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 hover:shadow-md transition peer-checked:border-blue-500 peer-checked:bg-blue-50">
+        <input type="radio" name="mode_" value="Car" class="hidden peer">
+        <i class="ri-car-line text-3xl text-gray-500 peer-checked:text-blue-500 mb-2"></i>
+        <span class="text-sm font-medium text-gray-700 peer-checked:text-blue-500">Car</span>
+    </label>
 
-            <!-- Submit Button -->
-            <input class="px-4 py-2 bg-blue-500 hover:bg-blue-600 transition text-white font-semibold rounded-md w-40 mt-6" type="submit" value="Book">
-        </form>
-    </div>
+    <!-- Bus -->
+    <label class="flex flex-col items-center justify-center p-4 bg-gray-50 border-2 border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 hover:shadow-md transition peer-checked:border-blue-500 peer-checked:bg-blue-50">
+        <input type="radio" name="mode_" value="Bus" class="hidden peer">
+        <i class="ri-bus-2-line text-3xl text-gray-500 peer-checked:text-blue-500 mb-2"></i>
+        <span class="text-sm font-medium text-gray-700 peer-checked:text-blue-500">Bus</span>
+    </label>
+
+    <!-- Train -->
+    <label class="flex flex-col items-center justify-center p-4 bg-gray-50 border-2 border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 hover:shadow-md transition peer-checked:border-blue-500 peer-checked:bg-blue-50">
+        <input type="radio" name="mode_" value="Train" class="hidden peer">
+        <i class="ri-train-line text-3xl text-gray-500 peer-checked:text-blue-500 mb-2"></i>
+        <span class="text-sm font-medium text-gray-700 peer-checked:text-blue-500">Train</span>
+    </label>
+
+    <!-- Flight -->
+    <label class="flex flex-col items-center justify-center p-4 bg-gray-50 border-2 border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 hover:shadow-md transition peer-checked:border-blue-500 peer-checked:bg-blue-50">
+        <input type="radio" name="mode_" value="Flight" class="hidden peer">
+        <i class="ri-flight-takeoff-line text-3xl text-gray-500 peer-checked:text-blue-500 mb-2"></i>
+        <span class="text-sm font-medium text-gray-700 peer-checked:text-blue-500">Flight</span>
+    </label>
+</div>
+                <!-- Submit Button -->
+                <input class="px-4 py-2 bg-blue-500 hover:bg-blue-600 transition text-white font-semibold rounded-md w-40 mt-6" type="submit" value="Book">
+            </form>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white py-4 shadow-md">
+        <div class="container mx-auto text-center text-gray-600">
+            <p>&copy; 2025 JourneySphere. All rights reserved.</p>
+        </div>
+    </footer>
 
     <script>
         async function fetchSuggestions(inputId, suggestionsId) {
@@ -124,12 +146,6 @@
         // Initialize autocomplete for "From" and "To" inputs
         fetchSuggestions('fromInput', 'fromSuggestions');
         fetchSuggestions('toInput', 'toSuggestions');
-        setTimeout(() => {
-            const popup = document.getElementById('popup');
-            if (popup) {
-                popup.style.display = 'none';
-            }
-        }, 3000);
     </script>
 </body>
 </html>

@@ -3,100 +3,110 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profile</title>
+    <title>Profile - JourneySphere</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link
     href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css"
     rel="stylesheet"/>
 </head>
-<body class="bg-zinc-900 text-white min-h-screen">
-    <div class="container mx-auto p-10">
+<body class="bg-gray-100 text-gray-800 min-h-screen">
+    <div class="container mx-auto p-6 md:p-10">
         <!-- Logout Button -->
         <div class="flex justify-end mb-6">
-            <a class="bg-red-500 hover:bg-red-600 transition px-4 py-2 rounded-md text-white font-semibold" href="/logout">Logout</a>
+            <a class="bg-red-500 hover:bg-red-600 transition px-4 py-2 rounded-md text-white font-semibold shadow-md" href="/logout">Logout</a>
         </div>
 
         <!-- User Greeting -->
-        <div class="flex items-center gap-4 mb-8">
-            <div class="h-16 w-16 rounded-full overflow-hidden">
+        <div class="flex items-center gap-6 mb-8 bg-white p-6 rounded-lg shadow-md">
+            <div class="h-20 w-20 rounded-full overflow-hidden border-4 border-blue-500">
                 <a href="profile/upload">
                     <img class="w-full h-full object-cover" src="/images/uploads/<%= user.PROFILEPIC %>" alt="Profile Picture">
                 </a>
             </div>
-            <h3 class="text-3xl font-semibold">Hello, <span class="text-green-400"><%= user.NAME %></span> 👋</h3>
+            <div>
+                <h3 class="text-3xl font-bold">Hello, <span class="text-blue-500"><%= user.NAME %></span></h3>
+                <p class="text-gray-600">Welcome back to your profile!</p>
+            </div>
         </div>
 
         <!-- Journey Details -->
-        <div class="bg-zinc-800 p-6 rounded-lg shadow-md mb-8">
-            <h4 class="text-xl font-semibold mb-4">Your Journey:</h4>
-            <div class="flex flex-wrap gap-6">
-                <p>From: <span class="text-green-500 font-medium"><%= fr_ %></span></p>
-                <p>To: <span class="text-green-500 font-medium"><%= to_ %></span></p>
-                <p>Mode: <span class="text-green-500 font-medium"><%= mode_ %></span></p>
-                <p>Country: <span class="text-green-500 font-medium"><%= country %></span></p>
+        <div class="bg-white p-6 rounded-lg shadow-md mb-8">
+            <h4 class="text-2xl font-semibold mb-4 text-gray-700">Your Journey</h4>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <p class="text-gray-600">From: <span class="text-blue-500 font-medium"><%= fr_ %></span></p>
+                <p class="text-gray-600">To: <span class="text-blue-500 font-medium"><%= to_ %></span></p>
+                <p class="text-gray-600">Mode: <span class="text-blue-500 font-medium"><%= mode_ %></span></p>
+                <p class="text-gray-600">Country: <span class="text-blue-500 font-medium"><%= country %></span></p>
             </div>
             <div class="mt-6">
-                <form method="post" action="/confirm" class="space-y-4">
+                <form method="post" action="/confirm" class="space-y-6">
                     <input type="hidden" name="fr_" value="<%= fr_ %>">
                     <input type="hidden" name="to_" value="<%= to_ %>">
                     <input type="hidden" name="mode_" value="<%= mode_ %>">
                     <input type="hidden" name="price" id="hidden-price"> <!-- Hidden input for price -->
 
                     <h5 class="text-lg font-semibold mb-4">Select the Days and Nights to Stay</h5>
-                    <div class="flex flex-wrap gap-4">
-                        <label class="flex items-center cursor-pointer">
-                            <input type="radio" name="duration" value="1 Day 1 Night" class="mr-2" data-price="5000">
-                            <span>1 Day 1 Night</span>
-                        </label>
-                        <label class="flex items-center cursor-pointer">
-                            <input type="radio" name="duration" value="2 Days 1 Night" class="mr-2" data-price="10000">
-                            <span>2 Days 1 Night</span>
-                        </label>
-                        <label class="flex items-center cursor-pointer">
-                            <input type="radio" name="duration" value="3 Days 2 Nights" class="mr-2" data-price="15000">
-                            <span>3 Days 2 Nights</span>
-                        </label>
-                        <label class="flex items-center cursor-pointer">
-                            <input type="radio" name="duration" value="4 Days 3 Nights" class="mr-2" data-price="20000">
-                            <span>4 Days 3 Nights</span>
-                        </label>
-                        <label class="flex items-center cursor-pointer">
-                            <input type="radio" name="duration" value="5 Days 4 Nights" class="mr-2" data-price="25000">
-                            <span>5 Days 4 Nights</span>
-                        </label>
-                    </div>
+<div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+    <!-- 1 Day 1 Night -->
+    <label class="flex items-center justify-center cursor-pointer bg-gray-50 p-3 rounded-lg border border-gray-300 hover:border-blue-500 hover:shadow-md transition peer-checked:bg-blue-100 peer-checked:border-blue-500">
+        <input type="radio" name="duration" value="1 Day 1 Night" class="hidden peer" data-price="5000">
+        <span class="text-gray-700 peer-checked:text-blue-500">1 Day 1 Night</span>
+    </label>
+
+    <!-- 2 Days 1 Night -->
+    <label class="flex items-center justify-center cursor-pointer bg-gray-50 p-3 rounded-lg border border-gray-300 hover:border-blue-500 hover:shadow-md transition peer-checked:bg-blue-100 peer-checked:border-blue-500">
+        <input type="radio" name="duration" value="2 Days 1 Night" class="hidden peer" data-price="10000">
+        <span class="text-gray-700 peer-checked:text-blue-500">2 Days 1 Night</span>
+    </label>
+
+    <!-- 3 Days 2 Nights -->
+    <label class="flex items-center justify-center cursor-pointer bg-gray-50 p-3 rounded-lg border border-gray-300 hover:border-blue-500 hover:shadow-md transition peer-checked:bg-blue-100 peer-checked:border-blue-500">
+        <input type="radio" name="duration" value="3 Days 2 Nights" class="hidden peer" data-price="15000">
+        <span class="text-gray-700 peer-checked:text-blue-500">3 Days 2 Nights</span>
+    </label>
+
+    <!-- 4 Days 3 Nights -->
+    <label class="flex items-center justify-center cursor-pointer bg-gray-50 p-3 rounded-lg border border-gray-300 hover:border-blue-500 hover:shadow-md transition peer-checked:bg-blue-100 peer-checked:border-blue-500">
+        <input type="radio" name="duration" value="4 Days 3 Nights" class="hidden peer" data-price="20000">
+        <span class="text-gray-700 peer-checked:text-blue-500">4 Days 3 Nights</span>
+    </label>
+
+    <!-- 5 Days 4 Nights -->
+    <label class="flex items-center justify-center cursor-pointer bg-gray-50 p-3 rounded-lg border border-gray-300 hover:border-blue-500 hover:shadow-md transition peer-checked:bg-blue-100 peer-checked:border-blue-500">
+        <input type="radio" name="duration" value="5 Days 4 Nights" class="hidden peer" data-price="25000">
+        <span class="text-gray-700 peer-checked:text-blue-500">5 Days 4 Nights</span>
+    </label>
+</div>
++
                     <div class="mt-4">
-                        <p class="text-lg font-semibold">Price: <span id="price" class="text-green-500">0</span> INR</p>
+                        <p class="text-lg font-semibold">Price: <span id="price" class="text-blue-500">0</span> INR</p>
                     </div>
-                    <div class="flex gap-4 mt-4">
-                        <a href="/previous-tickets" class="bg-blue-500 hover:bg-blue-600 transition px-4 py-2 rounded-md text-white font-semibold">View Previous Tickets</a>
-                        <button class="bg-green-500 hover:bg-green-600 transition px-4 py-2 rounded-md text-white font-semibold">Confirm Booking</button>
+                    <div class="flex gap-4 mt-6">
+                        <a href="/previous-tickets" class="bg-blue-500 hover:bg-blue-600 transition px-4 py-2 rounded-md text-white font-semibold shadow-md">View Previous Tickets</a>
+                        <button class="bg-green-500 hover:bg-green-600 transition px-4 py-2 rounded-md text-white font-semibold shadow-md">Confirm Booking</button>
                     </div>
                 </form>
             </div>
         </div>
-        
-        
-        
 
         <!-- Passenger Details Form -->
-        <div class="bg-zinc-800 p-6 rounded-lg shadow-md mb-8">
-            <h5 class="text-lg font-semibold mb-4">Enter the Details of the Passengers</h5>
+        <div class="bg-white p-6 rounded-lg shadow-md mb-8">
+            <h5 class="text-xl font-semibold mb-4 text-gray-700">Enter Passenger Details</h5>
             <form method="post" action="/post" class="space-y-4">
-                <input placeholder="Name" type="text" class="bg-transparent w-full px-4 py-2 border-2 rounded-lg border-zinc-700 outline-none focus:border-green-500" name="name" id="name">
-                <input placeholder="Age" type="number" class="bg-transparent w-full px-4 py-2 border-2 rounded-lg border-zinc-700 outline-none focus:border-green-500" name="age" id="age">
-                <input placeholder="Gender" type="text" class="bg-transparent w-full px-4 py-2 border-2 rounded-lg border-zinc-700 outline-none focus:border-green-500" name="gender" id="gender">
-                <input placeholder="Phone" type="number" class="bg-transparent w-full px-4 py-2 border-2 rounded-lg border-zinc-700 outline-none focus:border-green-500" name="phone" id="phone">
-                <input class="px-4 py-2 bg-blue-500 hover:bg-blue-600 transition text-white rounded-md w-full" type="submit" value="Add Passenger">
+                <input placeholder="Name" type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500" name="name" id="name">
+                <input placeholder="Age" type="number" class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500" name="age" id="age">
+                <input placeholder="Gender" type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500" name="gender" id="gender">
+                <input placeholder="Phone" type="number" class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500" name="phone" id="phone">
+                <input class="px-4 py-2 bg-blue-500 hover:bg-blue-600 transition text-white rounded-md w-full shadow-md" type="submit" value="Add Passenger">
             </form>
         </div>
 
         <!-- Passenger Table -->
-        <div class="bg-zinc-800 p-6 rounded-lg shadow-md">
-            <h5 class="text-lg font-semibold mb-4">Passenger List</h5>
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h5 class="text-xl font-semibold mb-4 text-gray-700">Passenger List</h5>
             <table class="table-auto border-collapse w-full border border-gray-300">
                 <thead>
-                    <tr class="bg-gray-400 text-black">
+                    <tr class="bg-gray-200 text-gray-800">
                         <th class="border border-gray-300 px-4 py-2">Name</th>
                         <th class="border border-gray-300 px-4 py-2">Age</th>
                         <th class="border border-gray-300 px-4 py-2">Gender</th>
@@ -106,7 +116,7 @@
                 </thead>
                 <tbody>
                     <% user.posts.forEach(function(post) { %>
-                        <tr class="hover:bg-gray-600">
+                        <tr class="hover:bg-gray-100">
                             <td class="border border-gray-300 px-4 py-2"><%= post.NAME %></td>
                             <td class="border border-gray-300 px-4 py-2"><%= post.AGE %></td>
                             <td class="border border-gray-300 px-4 py-2"><%= post.GENDER %></td>
@@ -122,14 +132,13 @@
         </div>
 
         <!-- Clear Ticket Button -->
-        <!-- <% if (ticketBooked) { %> -->
-            <form method="post" action="/delete-ticket" class="mt-6">
-                <button class="px-4 py-2 bg-red-500 hover:bg-red-600 transition text-white rounded-md w-full" type="submit">
-                    Clear Ticket
-                </button>
-            </form>
-        <!-- <% } %> -->
+        <form method="post" action="/delete-ticket" class="mt-6">
+            <button class="px-4 py-2 bg-red-500 hover:bg-red-600 transition text-white rounded-md w-full shadow-md" type="submit">
+                Clear Ticket
+            </button>
+        </form>
     </div>
+
     <script>
         const durationInputs = document.querySelectorAll('input[name="duration"]');
         const priceElement = document.getElementById('price');

@@ -90,7 +90,7 @@ app.get('/api/city-suggestions', async (req, res) => {
 app.get('/profile/upload', isLoggedIn, (req, res) => {
     res.render("profileupload");
 });
-app.get('/register', isLoggedIn, (req, res) => {
+app.get('/register', (req, res) => {
     res.render("register");
 });
 app.get('/login', (req, res) => {
@@ -348,6 +348,7 @@ app.get('/delete/:id', isLoggedIn, async (req, res) => {
 app.get('/previous-tickets', isLoggedIn, async (req, res) => {
     let connection;
     try {
+        
         connection = await oracledb.getConnection({
             user: 'sys',
             password: 'Aryan2023030#',
@@ -357,7 +358,7 @@ app.get('/previous-tickets', isLoggedIn, async (req, res) => {
 
         // Fetch all previous tickets for the logged-in user
         const ticketsResult = await connection.execute(
-            `SELECT id, fr_, to_, mode_,duration,price, ticket_date, rating, review 
+            `SELECT id, fr_, to_, mode_, duration, price, ticket_date, rating, is_cancelled, review 
              FROM tickets 
              WHERE user_id = :user_id 
              ORDER BY ticket_date DESC`,
@@ -910,9 +911,63 @@ app.post('/update/:id', isLoggedIn, async (req, res) => {
         }
     }
 });
-app.post('/delete-ticket', isLoggedIn, async (req, res) => {
+// app.post('/delete-previous-ticket', isLoggedIn, async (req, res) => {
+//     let connection;
+//     const { ticket_id } = req.body;
+//     try {
+//         connection = await oracledb.getConnection({
+//             user: 'sys',
+//             password: 'Aryan2023030#',
+//             connectString: 'localhost/orcl',
+//             privilege: oracledb.SYSDBA
+//         });
+
+//         // Reset ticketBooked status in the users table
+//         await connection.execute(
+//             `UPDATE users SET ticketBooked = 0 WHERE email = :email`,
+//             { email: req.user.email },
+//             { autoCommit: true }
+//         );
+
+//         // Delete all associated passenger details from the posts table
+//         await connection.execute(
+//             `DELETE FROM guidePosts WHERE user_id = :user_id`,
+//             { user_id: req.user.userid },
+//             { autoCommit: true }
+//         );
+//         await connection.execute(
+//             `DELETE FROM posts WHERE user_id = :user_id`,
+//             { user_id: req.user.userid },
+//             { autoCommit: true }
+//         );
+//         await connection.execute(
+//             'UPDATE tickets SET is_cancelled = :is_cancelled WHERE id = :ticket_id',
+//             { is_cancelled: 1, ticket_id },
+//             { autoCommit: true }
+//         );
+
+    
+//         res.json({ success: true });
+//     } catch (err) {
+//         console.error(err);
+//         res.status(500).send("Error deleting ticket");
+//     } finally {
+//         if (connection) {
+//             try {
+//                 await connection.close();
+//             } catch (err) {
+//                 console.error(err);
+//             }
+//         }
+//     }
+// });
+app.post('/delete-previous-ticket', isLoggedIn, async (req, res) => {
     let connection;
+    const { ticket_id } = req.body;
+
     try {
+        console.log("Ticket ID:", ticket_id); // Debugging
+
         connection = await oracledb.getConnection({
             user: 'sys',
             password: 'Aryan2023030#',
@@ -939,17 +994,29 @@ app.post('/delete-ticket', isLoggedIn, async (req, res) => {
             { autoCommit: true }
         );
 
+        // Update the ticket's cancellation status
+        const result = await connection.execute(
+            'UPDATE tickets SET is_cancelled = :is_cancelled WHERE id = :ticket_id',
+            { is_cancelled: 1, ticket_id },
+            { autoCommit: true }
+        );
 
-        res.redirect('/profile'); // Redirect back to the profile page
+        console.log("Rows Affected:", result.rowsAffected); // Debugging
+
+        if (result.rowsAffected === 0) {
+            return res.status(404).json({ success: false, message: "Ticket not found" });
+        }
+
+        res.redirect('/previous-tickets');
     } catch (err) {
-        console.error(err);
-        res.status(500).send("Error deleting ticket");
+        console.error("Error in /delete-previous-ticket route:", err);
+        res.status(500).json({ success: false, message: "Error canceling ticket", error: err.message });
     } finally {
         if (connection) {
             try {
                 await connection.close();
             } catch (err) {
-                console.error(err);
+                console.error("Error closing database connection:", err);
             }
         }
     }
