@@ -760,13 +760,6 @@ app.post('/delete', isLoggedIn, async (req, res) => {
 });
 
 app.post('/delete-ticket', isLoggedIn, async (req, res) => {
-    console.log('Before clearing posts array:', req.user.posts);
-    req.user.posts = [];
-    console.log('After clearing posts array:', req.user.posts);
-    res.redirect('/profile');
-});
-app.post('/login', async (req, res) => {
-    let { email, password } = req.body;
     let connection;
     try {
         connection = await oracledb.getConnection({
@@ -776,45 +769,25 @@ app.post('/login', async (req, res) => {
             privilege: oracledb.SYSDBA
         });
 
-        // Fetch user details
-        const result = await connection.execute(
-            `SELECT * FROM users WHERE email = :email`,
-            { email }
+        // Reset ticketBooked status in the users table
+        await connection.execute(
+            `UPDATE users SET ticketBooked = 0 WHERE email = :email`,
+            { email: req.user.email },
+            { autoCommit: true }
         );
 
-        if (result.rows.length === 0) {
-            return res.render("login", { message: "User not found", isSuccess: false });
-        }
+        // Delete all associated passenger details from the posts table
+        await connection.execute(
+            `DELETE FROM guidePosts WHERE user_id = :user_id`,
+            { user_id: req.user.userid },
+            { autoCommit: true }
+        );
 
-        const user = result.rows[0];
 
-        // Verify password
-        const match = await bcrypt.compare(password, user.PASSWORD);
-        if (match) {
-            const token = jwt.sign({ email: email, userid: user.ID }, "shhh");
-            res.cookie('token', token);
-
-            // Update the last_login and logged_in status in the database
-            await connection.execute(
-                `UPDATE users SET last_login = SYSTIMESTAMP, logged_in = 1 WHERE email = :email`,
-                { email },
-                { autoCommit: true }
-            );
-
-            // Fetch posts associated with the user
-            const postsResult = await connection.execute(
-                `SELECT * FROM posts WHERE user_id = :user_id`,
-                { user_id: user.ID }
-            );
-            user.posts = postsResult.rows;
-
-            return res.render("destination", { message: "Logged in successfully", isSuccess: true, user });
-        } else {
-            return res.render("login", { message: "Incorrect email or password", isSuccess: false });
-        }
+        res.redirect('/profile'); // Redirect back to the profile page
     } catch (err) {
         console.error(err);
-        res.status(500).send("Error logging in");
+        res.status(500).send("Error deleting ticket");
     } finally {
         if (connection) {
             try {
@@ -964,6 +937,24 @@ app.post('/update/:id', isLoggedIn, async (req, res) => {
 //         }
 //     }
 // });
+app.post('/login', async (req, res) => {
+    console.log('Login form data:', req.body);
+    try {
+        // Authenticate the user
+        const user = await authenticateUser(req.body);
+        console.log('Authentication result:', user);
+        if (user) {
+            // Login successful, redirect to dashboard
+            res.redirect('/dashboard');
+        } else {
+            // Login failed, display error message
+            res.render('login', { error: 'Invalid username or password' });
+        }
+    } catch (err) {
+        console.error('Error logging in:', err);
+        res.render('login', { error: 'Error logging in' });
+    }
+});
 app.post('/cancel-ticket/:id', isLoggedIn, async (req, res) => {
     let connection;
     try {
