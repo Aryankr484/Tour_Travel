@@ -102,34 +102,39 @@
         </div>
 
         <!-- Passenger Table -->
-        <div class="bg-white p-6 rounded-lg shadow-md">
-            <h5 class="text-xl font-semibold mb-4 text-gray-700">Passenger List</h5>
-            <table class="table-auto border-collapse w-full border border-gray-300">
-                <thead>
-                    <tr class="bg-gray-200 text-gray-800">
-                        <th class="border border-gray-300 px-4 py-2">Name</th>
-                        <th class="border border-gray-300 px-4 py-2">Age</th>
-                        <th class="border border-gray-300 px-4 py-2">Gender</th>
-                        <th class="border border-gray-300 px-4 py-2">Phone Number</th>
-                        <th class="border border-gray-300 px-4 py-2">Actions</th>
+        <!-- Passenger Table -->
+<div class="bg-white p-6 rounded-lg shadow-md">
+    <h5 class="text-xl font-semibold mb-4 text-gray-700">Passenger List</h5>
+    <% if (user.posts.length > 0) { %>
+        <table class="table-auto border-collapse w-full border border-gray-300">
+            <thead>
+                <tr class="bg-gray-200 text-gray-800">
+                    <th class="border border-gray-300 px-4 py-2">Name</th>
+                    <th class="border border-gray-300 px-4 py-2">Age</th>
+                    <th class="border border-gray-300 px-4 py-2">Gender</th>
+                    <th class="border border-gray-300 px-4 py-2">Phone Number</th>
+                    <th class="border border-gray-300 px-4 py-2">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% user.posts.forEach(function(post) { %>
+                    <tr class="hover:bg-gray-100">
+                        <td class="border border-gray-300 px-4 py-2"><%= post.NAME %></td>
+                        <td class="border border-gray-300 px-4 py-2"><%= post.AGE %></td>
+                        <td class="border border-gray-300 px-4 py-2"><%= post.GENDER %></td>
+                        <td class="border border-gray-300 px-4 py-2"><%= post.PHONE %></td>
+                        <td class="border border-gray-300 px-4 py-2">
+                            <a class="text-blue-500 hover:underline" href="/edit/<%= post.ID %>">Edit</a> |
+                            <a class="text-red-500 hover:underline" href="/delete/<%= post.ID %>">Delete</a>
+                        </td>
                     </tr>
-                </thead>
-                <tbody>
-                    <% user.posts.forEach(function(post) { %>
-                        <tr class="hover:bg-gray-100">
-                            <td class="border border-gray-300 px-4 py-2"><%= post.NAME %></td>
-                            <td class="border border-gray-300 px-4 py-2"><%= post.AGE %></td>
-                            <td class="border border-gray-300 px-4 py-2"><%= post.GENDER %></td>
-                            <td class="border border-gray-300 px-4 py-2"><%= post.PHONE %></td>
-                            <td class="border border-gray-300 px-4 py-2">
-                                <a class="text-blue-500 hover:underline" href="/edit/<%= post.ID %>">Edit</a> |
-                                <a class="text-red-500 hover:underline" href="/delete/<%= post.ID %>">Delete</a>
-                            </td>
-                        </tr>
-                    <% }); %>
-                </tbody>
-            </table>
-        </div>
+                <% }); %>
+            </tbody>
+        </table>
+    <% } else { %>
+        <p>No passengers in the list.</p>
+    <% } %>
+</div>
 
         <!-- Clear Ticket Button -->
         <form method="post" action="/delete-ticket" class="mt-6">
