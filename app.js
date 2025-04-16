@@ -578,6 +578,66 @@ app.post('/forgot-password', async (req, res) => {
         }
     }
 });
+app.post('/login', async (req, res) => {
+    let { email, password } = req.body;
+    let connection;
+    try {
+        connection = await oracledb.getConnection({
+            user: 'sys',
+            password: 'Aryan2023030#',
+            connectString: 'localhost/orcl',
+            privilege: oracledb.SYSDBA
+        });
+
+        // Fetch user details
+        const result = await connection.execute(
+            `SELECT * FROM users WHERE email = :email`,
+            { email }
+        );
+
+        if (result.rows.length === 0) {
+            return res.render("login", { message: "User not found", isSuccess: false });
+        }
+
+        const user = result.rows[0];
+
+        // Verify password
+        const match = await bcrypt.compare(password, user.PASSWORD);
+        if (match) {
+            const token = jwt.sign({ email: email, userid: user.ID }, "shhh");
+            res.cookie('token', token);
+
+            // Update the last_login and logged_in status in the database
+            await connection.execute(
+                `UPDATE users SET last_login = SYSTIMESTAMP, logged_in = 1 WHERE email = :email`,
+                { email },
+                { autoCommit: true }
+            );
+
+            // Fetch posts associated with the user
+            const postsResult = await connection.execute(
+                `SELECT * FROM posts WHERE user_id = :user_id`,
+                { user_id: user.ID }
+            );
+            user.posts = postsResult.rows;
+
+            return res.render("destination", { message: "Logged in successfully", isSuccess: true, user });
+        } else {
+            return res.render("login", { message: "Incorrect email or password", isSuccess: false });
+        }
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Error logging in");
+    } finally {
+        if (connection) {
+            try {
+                await connection.close();
+            } catch (err) {
+                console.error(err);
+            }
+        }
+    }
+});
 app.post('/register', async (req, res) => {
     let { email, password, username, name, age, gender, phone } = req.body;
     let connection;
