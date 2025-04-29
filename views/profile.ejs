@@ -9,7 +9,7 @@
     href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css"
     rel="stylesheet"/>
 </head>
-<body class="bg-gray-100 text-gray-800 min-h-screen">
+<body style="background-image: url('https://images.unsplash.com/photo-1705839297791-8045185fe30a?q=80&w=1932&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D');" class="bg-cover bg-center flex items-center text-gray-800 min-h-screen">
     <div class="container mx-auto p-6 md:p-10">
         <!-- Logout Button -->
         <div class="flex justify-end mb-6">
@@ -17,7 +17,7 @@
         </div>
 
         <!-- User Greeting -->
-        <div class="flex items-center gap-6 mb-8 bg-white p-6 rounded-lg shadow-md">
+        <div class="flex items-center gap-6 mb-8 bg-white bg-opacity-70 p-6 rounded-lg shadow-md">
             <div class="h-20 w-20 rounded-full overflow-hidden border-4 border-blue-500">
                 <a href="profile/upload">
                     <img class="w-full h-full object-cover" src="/images/uploads/<%= user.PROFILEPIC %>" alt="Profile Picture">
@@ -30,7 +30,7 @@
         </div>
 
         <!-- Journey Details -->
-        <div class="bg-white p-6 rounded-lg shadow-md mb-8">
+        <div class="bg-white bg-opacity-70 p-6 rounded-lg shadow-md mb-8">
             <h4 class="text-2xl font-semibold mb-4 text-gray-700">Your Journey</h4>
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <p class="text-gray-600">From: <span class="text-blue-500 font-medium"><%= fr_ %></span></p>
@@ -90,7 +90,7 @@
         </div>
 
         <!-- Passenger Details Form -->
-        <div class="bg-white p-6 rounded-lg shadow-md mb-8">
+        <div class="bg-white  rounded-lg shadow-md mb-8 p-6">
             <h5 class="text-xl font-semibold mb-4 text-gray-700">Enter Passenger Details</h5>
             <form method="post" action="/post" class="space-y-4">
                 <input placeholder="Name" type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500" name="name" id="name">
@@ -103,7 +103,7 @@
 
         <!-- Passenger Table -->
         <!-- Passenger Table -->
-<div class="bg-white p-6 rounded-lg shadow-md">
+<div class="bg-white  p-6 rounded-lg shadow-md">
     <h5 class="text-xl font-semibold mb-4 text-gray-700">Passenger List</h5>
     <% if (user.posts.length > 0) { %>
         <table class="table-auto border-collapse w-full border border-gray-300">

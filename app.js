@@ -42,7 +42,7 @@ app.get('/', (req, res) => {
 // });
 app.get('/api/city', async (req, res) => {
     const cityName = req.query.name || 'San Francisco'; // Get the city name from query parameters (default: San Francisco)
-    const apiKey = 'QVBVUMjndun3T51lNkJd1A==H1YkrpkzikaUWirb'; // Hardcoded API key
+    const apiKey = 'tneKnHSQ3RUGFHW0REy5Ag==RJGcwhplGHyuqdYx'; // Hardcoded API key
 
     try {
         // Make a GET request to the external API
@@ -65,7 +65,7 @@ app.get('/api/city', async (req, res) => {
 
 app.get('/api/city-suggestions', async (req, res) => {
     const query = req.query.name || ''; // Get the query from the request
-    const apiKey = 'QVBVUMjndun3T51lNkJd1A==H1YkrpkzikaUWirb'; // API key
+    const apiKey = 'tneKnHSQ3RUGFHW0REy5Ag==RJGcwhplGHyuqdYx'; // API key
 
     try {
         // Fetch city suggestions from the external API
